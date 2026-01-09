@@ -26,3 +26,5 @@ dist-ssr
 COMPLETE_CODEBASE.txt
 Copilot1.md
 destructuring.js
+.env
+.env.local
