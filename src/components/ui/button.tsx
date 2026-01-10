@@ -1,4 +1,16 @@
-function Button({ children, onClick, variant = 'primary', disabled = false, loading = false }) {
+import { Variable } from "lucide-react";
+
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  disabled?: boolean;
+  loading?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  className?: string;
+}
+
+function Button({ children, onClick, variant = 'primary', disabled = false, loading = false, type = 'button', className = '' }: ButtonProps) {
   const baseStyles = "px-4 py-2 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed";
   const variants = {
     primary: "bg-yellow-500 text-black hover:bg-yellow-400",
