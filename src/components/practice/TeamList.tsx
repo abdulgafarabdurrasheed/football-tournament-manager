@@ -1,32 +1,42 @@
 import { useState } from 'react';
 import Button from '../ui/button';
 
-function TeamList() {
-    const [teams, setTeams] = useState<Array<{ id: number; name: string; points: number }>>([
+interface Team {
+  id: number;
+  name: string;
+  points: number;
+}
+
+function TeamList(): JSX.Element {
+    const [teams, setTeams] = useState<Team[]>([
         { id: 1, name: 'Manchester United', points: 45 },
         { id: 2, name: 'Real Madrid', points: 42 },
         { id: 3, name: 'Bayern Munchen', points: 40 },
     ]);
     const [newTeam, setNewTeam] = useState<string>('');
-    const addTeam = () => {
+    
+    const addTeam = (): void => {
         if (!newTeam.trim()) return;
         setTeams([...teams, { id: Date.now(), name: newTeam.trim(), points: 0 }]);
         setNewTeam('');
     };
-    const removeTeam = (id: number) => {
+    
+    const removeTeam = (id: number): void => {
         setTeams(teams.filter(team => team.id !== id));
     };
-    const  addPoints = (id: number, amount: number) => {
+    
+    const addPoints = (id: number, amount: number): void => {
         setTeams(teams.map(team => team.id === id ? { ...team, points: team.points + amount } : team));
     };
-    const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
+    
+    const sortedTeams: Team[] = [...teams].sort((a, b) => b.points - a.points);
     return(
         <div className='space-y-4'>
             <div className='flex gap-2'>
                 <input
                     type="text"
                     value={newTeam}
-                    onChange={(e) => setNewTeam(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTeam(e.target.value)}
                     placeholder="Add a new team"
                     className="flex-1 bg-slate-800 border border-slate-700 p-2 rounded text-white"
                 />
