@@ -1,5 +1,6 @@
 import Card from './components/ui/card';
 import ColorChanger from './components/practice/ChangeColor'
+import SimpleForm from "./components/practice/SimpleForm";
 
 function App(){
     return (
@@ -7,6 +8,7 @@ function App(){
             <Card title="Manager Cards">Manager Info</Card>
             <Card hoverable onClick={() => alert('Clicked!')}>Clickable card</Card>
             <ColorChanger />
+            <SimpleForm />
         </div>
     )
 }
