@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Button from '../ui/button';
-import Card from '../ui/card';
+import Button from '../ui/Button';
+import Card from '../ui/Card';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
