@@ -7,7 +7,7 @@ interface Team {
   points: number;
 }
 
-function TeamList(): JSX.Element {
+function TeamList() {
     const [teams, setTeams] = useState<Team[]>([
         { id: 1, name: 'Manchester United', points: 45 },
         { id: 2, name: 'Real Madrid', points: 42 },
