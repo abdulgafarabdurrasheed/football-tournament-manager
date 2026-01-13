@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import NotFound from './pages/NotFound';
+import TodoPage from "./exercises/Todo";
 
 interface User {
 	id: string;
@@ -59,6 +60,7 @@ function App() {
 						/>
 						<Route path="/tournament/:id" element={<div className="text-center py-16 text-slate-400">Tournament View (Coming Phase 4)</div>} />
 						<Route path="*" element={<NotFound />} />
+						<Route path="/todo" element={<TodoPage />} />
 					</Routes>
 				</main>
 			</div>
