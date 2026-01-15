@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import NotFound from './pages/NotFound';
 import TodoPage from "./exercises/Todo";
 import { LoginFormDemo } from './exercises/LoginFormDemo';
+import { AuthTest } from './exercises/AuthTest'
 
 interface User {
 	id: string;
@@ -63,6 +64,7 @@ function App() {
 						<Route path="*" element={<NotFound />} />
 						<Route path="/todo" element={<TodoPage />} />
 						<Route path="/fakelogin" element={<LoginFormDemo />} />
+						<Route path="/authtest" element={<AuthTest />} />
 					</Routes>
 				</main>
 			</div>
