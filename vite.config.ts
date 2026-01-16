@@ -10,4 +10,10 @@ export default defineConfig({
 			"@": path.resolve(__dirname, "./src"),
 		},
 	},
+	if (command !== 'serve') {
+    // Only add the repo name for production builds
+    config.base = '/football-tournament-manager/'
+  }
+
+  return config
 });
