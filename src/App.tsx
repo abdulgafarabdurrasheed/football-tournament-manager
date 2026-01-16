@@ -31,7 +31,7 @@ function App() {
 	};
 
 	return(
-		<BrowserRouter basename={import.meta.env.DEV ? '/' : '/football-tournament-manager/'}>
+		<BrowserRouter basename={import.meta.env.BASE_URL}>
 			<div className="min-h-screen bg-slate-950 text-slate-200">
 				<Header 
 					user={user}
