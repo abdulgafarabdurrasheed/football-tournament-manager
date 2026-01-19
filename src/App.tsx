@@ -8,8 +8,7 @@ import TodoPage from "./exercises/Todo";
 import { LoginFormDemo } from './exercises/LoginFormDemo';
 import { AuthTest } from './exercises/AuthTest'
 import LoginForm from '@/components/auth/LoginForm'
-import { group } from 'node:console';
-import { WeightTildeIcon } from 'lucide-react';
+import { RegisterForm } from '@/components/auth/RegisterForm'
 
 interface User {
 	id: string;
@@ -69,6 +68,7 @@ function App() {
 						<Route path="/fakelogin" element={<LoginFormDemo />} />
 						<Route path="/authtest" element={<AuthTest />} />
 						<Route path="/login" element={<LoginForm onSuccess={handleLogin} />} />
+						<Route path="/register" element={<RegisterForm onSuccess={handleLogin} />} />
 					</Routes>
 				</main>
 			</div>
