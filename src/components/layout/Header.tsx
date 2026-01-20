@@ -1,6 +1,7 @@
 import { Trophy, User, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import Button from '../ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 interface UserData {
   id: string;
@@ -17,6 +18,7 @@ interface HeaderProps {
 
 function Header({ user, onLogin, onLogout }: HeaderProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+    const navigate = useNavigate();
 
     return (
         <header className='bg-slate-900/50 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40'>
@@ -47,7 +49,7 @@ function Header({ user, onLogin, onLogout }: HeaderProps) {
               </button>
             </div>
           ) : (
-            <Button onClick={onLogin}>
+            <Button onClick={() => {navigate('/login')}}>
               Sign In
             </Button>
           )}

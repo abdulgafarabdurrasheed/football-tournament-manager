@@ -1,11 +1,16 @@
 import Button from '../components/ui/Button';
 import { Trophy } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+
 
 interface LandingPageProps {
   onLogin: () => void;
 }
 
 function LandingPage({ onLogin }: LandingPageProps) {
+  const navigate = useNavigate();
+
   return (
     <div className="text-center py-16 md:py-24">
       <div className="bg-slate-900 p-6 rounded-full inline-block mb-6 shadow-2xl shadow-yellow-500/10">
@@ -17,7 +22,7 @@ function LandingPage({ onLogin }: LandingPageProps) {
       <p className="text-slate-400 max-w-lg mx-auto text-lg mb-8">
         The ultimate tournament tracker for your local leagues. Create tournaments, track stats, and settle debates.
       </p>
-      <Button onClick={onLogin} className="text-lg px-8 py-3">
+      <Button onClick={() => {navigate('/register')}} className="text-lg px-8 py-3">
         Get Started
       </Button>
     </div>
