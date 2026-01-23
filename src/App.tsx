@@ -1,79 +1,44 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from "./components/layout/Header";
-import { useState } from 'react';
+import { useEffect } from 'react';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import NotFound from './pages/NotFound';
-import TodoPage from "./exercises/Todo";
-import { LoginFormDemo } from './exercises/LoginFormDemo';
-import { AuthTest } from './exercises/AuthTest'
-import LoginForm from '@/components/auth/LoginForm'
-import { RegisterForm } from '@/components/auth/RegisterForm'
+import { useAuthStore } from './stores/authStores';
+import { ProtectedRoute } from './components/auth';
+import { AuthCallback } from '@/pages/AuthCallback';
 
-interface User {
-	id: string;
-	name: string;
-	email: string;
-	avatar?: string;
-}
+export default function App() {
+	const { initialize, isLoading } = useAuthStore()
+	useEffect(() => {
+		initialize()
+	}, [initialize])
 
-function App() {
-	const [user, setUser] = useState<User | null>(null);
+		if(isLoading) {
+			return (
+				<div className='min-h-screen bg-slate-950 flex items-center justify-center'>
+					<div className="text-center">
+						<div className="animate-spin w-8 h-8 border-2 border-yellow-500 border-t-transparesnt rounded-full mx-auto" />
+						<p className="text-slate-400 mt-4">Loading..........</p>
+					</div>
+				</div>
+			)
+		}
 
-	const handleLogin = (): void => {
-		setUser({
-			id: '123',
-			name: 'Flavortown',
-			email: 'flavortown@example.com',
-		});
-	};
-	
-	const handleLogout = (): void => {
-		setUser(null);
-	};
+		return (
+			<BrowserRouter>
+				<div className="min-h-screen bg-slate-950 text-slate-200">
+					<Header />
 
-	return(
-		<BrowserRouter basename={import.meta.env.BASE_URL}>
-			<div className="min-h-screen bg-slate-950 text-slate-200">
-				<Header 
-					user={user}
-					onLogin={handleLogin}
-					onLogout={handleLogout}
-				/>
-				<main className="max-w-7xl mx-auto p-4 md:p-8">
 					<Routes>
-						<Route 
-							path="/" 
-							element={
-								user ? (
-									<Navigate to="/dashboard" replace />
-								) : (
-									<LandingPage onLogin={handleLogin} />
-								)
-							} 
-						/>
-						<Route 
-							path="/dashboard" 
-							element={
-								user ? (
-									<Dashboard user={user} />
-								) : (
-									<Navigate to="/" replace />
-								)
-							} 
-						/>
-						<Route path="/tournament/:id" element={<div className="text-center py-16 text-slate-400">Tournament View (Coming Phase 4)</div>} />
-						<Route path="*" element={<NotFound />} />
-						<Route path="/todo" element={<TodoPage />} />
-						<Route path="/fakelogin" element={<LoginFormDemo />} />
-						<Route path="/authtest" element={<AuthTest />} />
-						<Route path="/login" element={<LoginForm onSuccess={handleLogin} />} />
-						<Route path="/register" element={<RegisterForm onSuccess={handleLogin} />} />
-					</Routes>
-				</main>
-			</div>
-		</BrowserRouter>
-	);
-}
+						<Route path='/' element={<LandingPage />} />
+						<Route path='/auth/callback' element={<AuthCallback />}	/>
 
-export default App;
+						<Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+						<Route path="*" element={<NotFound />} />
+
+					</Routes>
+				</div>
+			</BrowserRouter>
+		)
+}

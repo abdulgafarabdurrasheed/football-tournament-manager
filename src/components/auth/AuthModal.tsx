@@ -66,8 +66,8 @@ export function AuthModal({
             className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden"
           >
             <div className="relative p-6 pb-0">
-              <button className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
-                <X className="h-5 w-5" />
+              <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+                <X className="h-5 w-5"  />
               </button>
               <div className="flex items-center justify-center gap-3 mb-6">
                 <div className="bg-gradient-to-br from-yellow-400 to-orange-600 p-2.5 rounded-xl shadow-lg shadow-orange-500/20">
@@ -80,7 +80,7 @@ export function AuthModal({
               </div>
 
               <h3 className="text-xl font-bold text-white text-center mb-2">
-                {activeTab === "login" ? "Welcom back" : "Create account"}
+                {activeTab === "login" ? "Welcome back" : "Create account"}
               </h3>
               <p className="text-slate-400 text-center text-sm mb-6">
                 {activeTab === "login"
@@ -102,6 +102,7 @@ export function AuthModal({
                   onSuccess={handleSuccess}
                   onSwitchToLogin={() => setActiveTab("login")}
                 />
+                
               )}
             </div>
           </motion.div>
