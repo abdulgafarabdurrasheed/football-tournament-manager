@@ -10,7 +10,7 @@ interface ButtonProps {
 	className?: string;
 }
 
-function Button({
+export function Button({
 	children,
 	onClick,
 	variant = "primary",

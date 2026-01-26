@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import NotFound from './pages/NotFound';
+import ProfileView from '@/pages//ProfileView'
 import { useAuthStore } from './stores/authStores';
 import { ProtectedRoute } from './components/auth';
 import { AuthCallback } from '@/pages/AuthCallback';
