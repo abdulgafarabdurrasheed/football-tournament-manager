@@ -5,6 +5,7 @@ import { loginSchema, type LoginFormData } from "@/schemas/auth.schema";
 import { useAuthStore } from "@/stores/authStores";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -13,6 +14,7 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
   const { signIn, error: authError, setError } = useAuthStore();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -31,6 +33,7 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
       setError(null);
       await signIn(data.email, data.password);
       onSuccess?.();
+      navigate('/dashboard');
     } catch (error) {
       console.error("Login failed:", error);
     }

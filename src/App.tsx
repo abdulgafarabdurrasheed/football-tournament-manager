@@ -4,11 +4,12 @@ import { useEffect } from 'react';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
 import NotFound from './pages/NotFound';
-import ProfileView from '@/pages//ProfileView'
+import ProfileView from '@/pages/ProfileView'
 import { useAuthStore } from './stores/authStores';
 import { ProtectedRoute } from './components/auth';
 import { AuthCallback } from '@/pages/AuthCallback';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function App() {
 	const { initialize, isLoading } = useAuthStore()
@@ -38,10 +39,12 @@ export default function App() {
 							<Route path='/auth/callback' element={<AuthCallback />}	/>
 
 							<Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+							<Route path="/profile" element={<ProtectedRoute><ProfileView /></ProtectedRoute>} />
 							<Route path="*" element={<NotFound />} />
 
 						</Routes>
 					</div>
+					<Toaster />
 				</BrowserRouter>
 			</ErrorBoundary>			
 		)

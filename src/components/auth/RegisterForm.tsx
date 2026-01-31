@@ -1,11 +1,11 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Mail, Lock, User, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Mail, Lock, User, Loader2, AlertCircle } from 'lucide-react'
 import { registerSchema, type RegisterFormData } from '@/schemas/auth.schema'
 import { useAuthStore } from '@/stores/authStores'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import { useState } from 'react'
+import { toast } from 'sonner'
 
 interface RegisterFormProps {
   onSuccess?: () => void
@@ -14,7 +14,6 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) {
   const { signUp, error: authError, setError } = useAuthStore()
-  const [emailSent, setEmailSent] = useState(false)
   
   const {
     register,
@@ -39,28 +38,16 @@ export function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFormProps) 
       setError(null)
       await signUp(data.email, data.password, data.displayName || undefined)
       
-      setEmailSent(true)
+      toast.success('Check your email!', {
+        description: 'We\'ve sent a confirmation link to verify your account.',
+        duration: 5000,
+      })
+      
+      onSuccess?.()
+      onSwitchToLogin?.()
     } catch (error) {
       console.error('Registration failed:', error)
     }
-  }
-
-  if (emailSent) {
-    return (
-      <div className="text-center py-8">
-        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="h-8 w-8 text-green-500" />
-        </div>
-        <h3 className="text-xl font-bold text-white mb-2">Check your email</h3>
-        <p className="text-slate-400 mb-6">
-          We've sent a confirmation link to your email address.
-          Please click the link to verify your account.
-        </p>
-        <Button variant="secondary" onClick={onSwitchToLogin}>
-          Back to Sign In
-        </Button>
-      </div>
-    )
   }
 
   return (
