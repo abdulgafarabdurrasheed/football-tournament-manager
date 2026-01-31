@@ -12,7 +12,7 @@ export function ProtectedRoute({
   children,
   redirectTo = "/",
 }: ProtectedRouteProps) {
-  const isAuthenticated = useIsAuthenticated;
+  const isAuthenticated = useIsAuthenticated();
   const isLoading = useAuthLoading();
   const location = useLocation();
 

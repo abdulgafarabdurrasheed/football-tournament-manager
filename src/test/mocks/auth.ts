@@ -1,4 +1,4 @@
-import type { User } from '../../src/types/database.types'
+import type { User } from '../../types/database.types'
 
 export const mockUser: User = {
     id: 'test-user-123',
