@@ -40,7 +40,7 @@ export function captureError(error: Error, context?: Record<string, unknown>) {
     }
 }
 
-export function addBreadcrumbs(
+export function addBreadcrumb(
     message: string,
     category: string,
     data?: Record<string, unknown>,

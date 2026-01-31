@@ -3,6 +3,7 @@ import { persist, devtools } from 'zustand/middleware'
 import { supabase, signInWithEmail, signUpWithEmail, signInWithGoogle, signOut as supabaseSignOut } from '@/lib/supabase'
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database.types'
+import { setSentryUser, captureError, addBreadcrumb } from '@/lib/sentry'
 
 type Profile = Tables<'profiles'>
 
@@ -60,14 +61,21 @@ export const useAuthStore = create<AuthState>()(
             
             const { data: { session } } = await supabase.auth.getSession()
             
-            if (session) {
+            if (session?.user) {
               set({ 
                 session, 
                 user: mapUser(session.user),
               })
               get().fetchProfile()
+
+              setSentryUser({
+                id: session.user.id,
+                email: session.user.email || '',
+              })
+
+              addBreadcrumb('User initialized', 'auth', { userId: session.user.id })
             }
-            
+
             supabase.auth.onAuthStateChange(async (event, session) => {
               console.log('Auth event:', event)
               
@@ -87,6 +95,7 @@ export const useAuthStore = create<AuthState>()(
           } catch (error) {
             console.error('Auth init error:', error)
             set({ error: (error as Error).message })
+            captureError(error as Error, { context: 'auth.initialize' })
           } finally {
             set({ isLoading: false })
           }
@@ -94,6 +103,7 @@ export const useAuthStore = create<AuthState>()(
 
         signIn: async (email, password) => {
           try {
+            addBreadcrumb('User signing in', 'auth', { email })
             set({ isLoading: true, error: null })
             const { session, user } = await signInWithEmail(email, password)
             set({ 
@@ -102,6 +112,7 @@ export const useAuthStore = create<AuthState>()(
             })
             get().fetchProfile()
           } catch (error) {
+            captureError(error as Error, { context: 'auth.signIn', email })
             set({ error: (error as Error).message })
             throw error
           } finally {
@@ -143,11 +154,16 @@ export const useAuthStore = create<AuthState>()(
 
         signOut: async () => {
           try {
+            addBreadcrumb('User signing out', 'auth')
             set({ isLoading: true, error: null })
             await supabaseSignOut()
+
+            setSentryUser(null)
             set(initialState)
             set({ isLoading: false })
+            set({ user: null, isLoading: false, error: null })
           } catch (error) {
+            captureError(error as Error, { context: 'auth.signOut' })
             set({ error: (error as Error).message, isLoading: false })
             throw error
           }
