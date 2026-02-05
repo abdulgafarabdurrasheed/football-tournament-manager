@@ -13,6 +13,7 @@ import { BasicInfoStep } from '@/components/tournament/wizard/BasicInfoStep'
 import { FormatStep } from '@.components/tournament/wizard/FormatStep'
 import { SettingsStep } from "@/components/tournament/wizard/SettingsStep";
 import { ReviewStep } from '@/components/tournament/wizard/ReviewStep'
+import { time } from "node:console";
 
 const STEPS = [
     { id: 'basic', title: 'Basic Information', component: BasicInfoStep },
@@ -128,11 +129,71 @@ export default function TournamentWizard() {
                             ) : (index + 1)}</div>
 
                             {index < STEPS.length - 1 && (
-                                <div></div>
+                                <div className={`w-16 h-1 mx-2
+                                    ${index < currentStep ? 'bg-green-500' : 'bg-slate-700'}`} />
                             )}
                     </div>
                 ))}
             </div>
+
+            <h2 className="text-xl font-semibold text-white mb-6">
+                {STEPS[currentStep].title}
+            </h2>
+
+            <FormProvider {...methods}>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentStep}
+                            initial={{ opacity: 0, x:20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <StepComponent />
+                        </motion.div>
+                    </AnimatePresence>
+
+                    <div className="flex justify-between mt-8 pt-6 border-t border-slate-700">
+                        <Button type="button" variant="ghost" onClick={goBack} disabled={currentStep === 0}>
+                            <ChevronLeft className="w-4 h-4 mr-2" />
+                            Back    
+                        </Button>
+
+                        {currentStep < STEPS.length - 1 ? (
+                            <Button type="button" onClick={goNext}>
+                                Next
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        ) : (
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    <>
+                                        Create Tournament
+                                        <Check className="w-4 h-4 ml-2" />
+                                    </>
+                                )}
+                            </Button>
+                        )}
+                    </div>
+                </form>
+            </FormProvider>
         </AnimatedPage>
     )
+}
+
+function getStepFields(step: number): (keyof CreateTournamentFormData)[]
+{
+    switch (step) {
+        case 0: return ['name', 'description', 'visibility']
+        case 1: return ['format', 'maxParticipants']
+        case 2: return ['pointsForWin', 'pointsForDraw', 'legsPerMatch', 'groupSize', 'teamsAdvancing', 'hasThirdPlace']
+        case 3: return []
+        default: return []
+    }
 }
