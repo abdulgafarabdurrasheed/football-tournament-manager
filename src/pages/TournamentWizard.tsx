@@ -3,197 +3,237 @@ import { useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Check, Loader2, Component } from 'lucide-react'
-import { createTournamentSchema, type CreateTournamentFormData } from "@/schemas/tournament.schema";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Loader2,
+  Component,
+} from "lucide-react";
+import {
+  createTournamentSchema,
+  type CreateTournamentFormData,
+} from "@/schemas/tournament.schema";
 import { useCreateTournament } from "@/hooks/useTournament";
 import { useTournamentStore, useWizardDraft } from "@/stores/tournamentStore";
 import { Button } from "@/components/ui/Button";
-import { AnimatedPage } from '@/components/ui/AnimatedPage'
-import { BasicInfoStep } from '@/components/tournament/wizard/BasicInfoStep'
-import { FormatStep } from '@.components/tournament/wizard/FormatStep'
+import { AnimatedPage } from "@/components/ui/AnimatedPage";
+import { BasicInfoStep } from "@/components/tournament/wizard/BasicInfoStep";
+import { FormatStep } from "@/components/tournament/wizard/FormatStep";
 import { SettingsStep } from "@/components/tournament/wizard/SettingsStep";
-import { ReviewStep } from '@/components/tournament/wizard/ReviewStep'
-import { time } from "node:console";
+import { ReviewStep } from "@/components/tournament/wizard/ReviewStep";
 
 const STEPS = [
-    { id: 'basic', title: 'Basic Information', component: BasicInfoStep },
-    { id: 'format', title: 'Format', component: FormatStep },
-    { id: 'settings', title: 'Settings', component: SettingsStep },
-    { id: 'review', title: 'Review', component: ReviewStep }
-]
+  { id: "basic", title: "Basic Information", component: BasicInfoStep },
+  { id: "format", title: "Format", component: FormatStep },
+  { id: "settings", title: "Settings", component: SettingsStep },
+  { id: "review", title: "Review", component: ReviewStep },
+];
 
 export default function TournamentWizard() {
-    const navigate = useNavigate()
-    const wizardDraft = useWizardDraft()
-    const { updateWizardData, updateWizardStep, clearWizardDraft } = useTournamentStore()
-    const createTournament = useCreateTournament()
+  const navigate = useNavigate();
+  const wizardDraft = useWizardDraft();
+  const { updateWizardData, updateWizardStep, clearWizardDraft } =
+    useTournamentStore();
+  const createTournament = useCreateTournament();
 
-    const [currentStep, setCurrentStep] = useState(wizardDraft?.currentStep ?? 0)
-    const methods = useForm<CreateTournamentFormData>({
-        resolver: zodResolver(createTournamentSchema),
-        defaultValues: {
-            name: '',
-            description: '',
-            visibility: 'PRIVATE',
-            format: 'LEAGUE',
-            maxParticipants: 8,
-            pointsForWin: 3,
-            pointsForDraw: 1,
-            legsPerMatch: 2,
-            groupSize: 4,
-            teamsAdvancing: 2,
-            hasThirdPlace: false,
-            inviteEmails: [],
-            ...wizardDraft?.data,
+  const [currentStep, setCurrentStep] = useState(wizardDraft?.currentStep ?? 0);
+  const methods = useForm<CreateTournamentFormData>({
+    resolver: zodResolver(createTournamentSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      visibility: "PRIVATE",
+      format: "LEAGUE",
+      maxParticipants: 8,
+      pointsForWin: 3,
+      pointsForDraw: 1,
+      legsPerMatch: 2,
+      groupSize: 4,
+      teamsAdvancing: 2,
+      hasThirdPlace: false,
+      inviteEmails: [],
+      ...wizardDraft?.data,
+    },
+    mode: "onChange",
+  });
+
+  const {
+    handleSubmit,
+    trigger,
+    getValues,
+    formState: { isSubmitting },
+  } = methods;
+
+  useEffect(() => {
+    const subscription = methods.watch((data) => {
+      updateWizardData(data);
+    });
+    return () => subscription.unsubscribe();
+  }, [methods, updateWizardData]);
+
+  useEffect(() => {
+    updateWizardStep(currentStep);
+  }, [currentStep, updateWizardStep]);
+
+  const StepComponent = STEPS[currentStep].component;
+
+  const goNext = async () => {
+    const fieldsToValidate = getStepFields(currentStep);
+    const isValid = await trigger(fieldsToValidate);
+
+    if (isValid && currentStep < STEPS.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+    }
+  };
+
+  const goBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
+
+  const onSubmit = async (data: CreateTournamentFormData) => {
+    try {
+      const tournament = await createTournament.mutateAsync({
+        name: data.name,
+        description: data.description,
+        format: data.format,
+        visibility: data.visibility,
+        maxParticipants: data.maxParticipants,
+        settings: {
+          pointsForWin: data.pointsForWin,
+          pointsForDraw: data.pointsForDraw,
+          pointsForLoss: 0,
+          legsPerMatch: data.legsPerMatch,
+          groupSize: data.groupSize,
+          teamsAdvancing: data.teamsAdvancing,
+          hasThirdPlace: data.hasThirdPlace,
+          tiebreakers: ["goalDifference", "goalsScored", "headToHead"],
         },
-        mode: 'onChange',
-    })
+      });
 
-    const { handleSubmit, trigger, getValues, formState: { isSubmitting } } = methods
-
-    useEffect(() => {
-        const subscription = methods.watch((data) => {
-            updateWizardData(data)
-        })
-        return () => subscription.unsubscribe()
-    }, [methods, updateWizardData])
-
-    useEffect(() => {
-        updateWizardStep(currentStep)
-    }, [currentStep, updateWizardStep])
-
-    const StepComponent = STEPS[currentStep].component
-
-    const goNext = async () =>  {
-        const fieldsToValidate = getStepFields(currentStep)
-        const isValid = await trigger(fieldsToValidate)
-
-        if (isValid && currentStep < STEPS.length - 1) {
-            setCurrentStep(prev => prev + 1)
-        }
+      clearWizardDraft();
+      navigate(`/tournaments/${tournament.id}`);
+    } catch (error) {
+      console.error("Failed to create tournament:", error);
     }
+  };
 
-    const goBack = () => {
-        if (currentStep > 0) {
-            setCurrentStep(prev => prev - 1)
-        }
-    }
+  return (
+    <AnimatedPage className="max-w-2xl mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">
+          Create Tournament
+        </h1>
+        <p className="text-slate-400">
+          Set up your tournament in a few easy steps.
+        </p>
+      </div>
 
-    const onSubmit = async (data: CreateTournamentFormData) => {
-        try {
-            const tournament = await createTournament.mutateAsync({
-                name: data.name,
-                description: data.description,
-                format: data.format,
-                visibility: data.visibility,
-                maxParticipants: data.maxParticipants,
-                settings: {
-                pointsForWin: data.pointsForWin,
-                pointsForDraw: data.pointsForDraw,
-                pointsForLoss: 0,
-                legsPerMatch: data.legsPerMatch,
-                groupSize: data.groupSize,
-                teamsAdvancing: data.teamsAdvancing,
-                hasThirdPlace: data.hasThirdPlace,
-                tiebreakers: ['goalDifference', 'goalsScored', 'headToHead'],
-                },
-            })
-
-            clearWizardDraft()
-            navigate(`/tournaments/${tournament.id}`)
-        } catch (error) {
-            console.error('Failed to create tournament:', error)
-        }
-    }
-
-    return (
-        <AnimatedPage className="max-w-2xl mx-auto px-4 py-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Create Tournament</h1>
-                <p className="text-slate-400">Set up your tournament in a few easy steps.</p>
-            </div>
-
-            <div className="flex items-center justify-between mb-8">
-                {STEPS.map((step, index) => (
-                    <div className="flex items-center" key={step.id}>
-                        <div className={`
+      <div className="flex items-center justify-between mb-8">
+        {STEPS.map((step, index) => (
+          <div className="flex items-center" key={step.id}>
+            <div
+              className={`
                             w-10 h-10 rounded-full flex items-center justify-center font-semibold
                             transition-colors duration-200
-                            ${index < currentStep 
-                                ? 'bg-green-500 text-white' 
-                                : index === currentStep 
-                                ? 'bg-yellow-500 text-slate-900' 
-                                : 'bg-slate-700 text-slate-400'}
-                            `}>{index < currentStep ? (
-                                <Check className="w-5 h-5" />
-                            ) : (index + 1)}</div>
-
-                            {index < STEPS.length - 1 && (
-                                <div className={`w-16 h-1 mx-2
-                                    ${index < currentStep ? 'bg-green-500' : 'bg-slate-700'}`} />
-                            )}
-                    </div>
-                ))}
+                            ${
+                              index < currentStep
+                                ? "bg-green-500 text-white"
+                                : index === currentStep
+                                  ? "bg-yellow-500 text-slate-900"
+                                  : "bg-slate-700 text-slate-400"
+                            }
+                            `}
+            >
+              {index < currentStep ? <Check className="w-5 h-5" /> : index + 1}
             </div>
 
-            <h2 className="text-xl font-semibold text-white mb-6">
-                {STEPS[currentStep].title}
-            </h2>
+            {index < STEPS.length - 1 && (
+              <div
+                className={`w-16 h-1 mx-2
+                                    ${index < currentStep ? "bg-green-500" : "bg-slate-700"}`}
+              />
+            )}
+          </div>
+        ))}
+      </div>
 
-            <FormProvider {...methods}>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentStep}
-                            initial={{ opacity: 0, x:20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            <StepComponent />
-                        </motion.div>
-                    </AnimatePresence>
+      <h2 className="text-xl font-semibold text-white mb-6">
+        {STEPS[currentStep].title}
+      </h2>
 
-                    <div className="flex justify-between mt-8 pt-6 border-t border-slate-700">
-                        <Button type="button" variant="ghost" onClick={goBack} disabled={currentStep === 0}>
-                            <ChevronLeft className="w-4 h-4 mr-2" />
-                            Back    
-                        </Button>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <StepComponent />
+            </motion.div>
+          </AnimatePresence>
 
-                        {currentStep < STEPS.length - 1 ? (
-                            <Button type="button" onClick={goNext}>
-                                Next
-                                <ChevronRight className="w-4 h-4 ml-2" />
-                            </Button>
-                        ) : (
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                        Creating...
-                                    </>
-                                ) : (
-                                    <>
-                                        Create Tournament
-                                        <Check className="w-4 h-4 ml-2" />
-                                    </>
-                                )}
-                            </Button>
-                        )}
-                    </div>
-                </form>
-            </FormProvider>
-        </AnimatedPage>
-    )
+          <div className="flex justify-between mt-8 pt-6 border-t border-slate-700">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={goBack}
+              disabled={currentStep === 0}
+            >
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+
+            {currentStep < STEPS.length - 1 ? (
+              <Button type="button" onClick={goNext}>
+                Next
+                <ChevronRight className="w-4 h-4 ml-2" />
+              </Button>
+            ) : (
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    Create Tournament
+                    <Check className="w-4 h-4 ml-2" />
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </form>
+      </FormProvider>
+    </AnimatedPage>
+  );
 }
 
-function getStepFields(step: number): (keyof CreateTournamentFormData)[]
-{
-    switch (step) {
-        case 0: return ['name', 'description', 'visibility']
-        case 1: return ['format', 'maxParticipants']
-        case 2: return ['pointsForWin', 'pointsForDraw', 'legsPerMatch', 'groupSize', 'teamsAdvancing', 'hasThirdPlace']
-        case 3: return []
-        default: return []
-    }
+function getStepFields(step: number): (keyof CreateTournamentFormData)[] {
+  switch (step) {
+    case 0:
+      return ["name", "description", "visibility"];
+    case 1:
+      return ["format", "maxParticipants"];
+    case 2:
+      return [
+        "pointsForWin",
+        "pointsForDraw",
+        "legsPerMatch",
+        "groupSize",
+        "teamsAdvancing",
+        "hasThirdPlace",
+      ];
+    case 3:
+      return [];
+    default:
+      return [];
+  }
 }
