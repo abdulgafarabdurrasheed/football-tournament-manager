@@ -9,8 +9,11 @@ import {
   Calendar,
   Loader2,
   School,
+  Badge,
+  Download,
+  Ambulance,
 } from "lucide-react";
-import { easeIn, motion } from "framer-motion";
+import { checkVariantsDidChange, easeIn, motion } from "framer-motion";
 import { useMyTournaments, usePublicTournaments } from "@/hooks/useTournament";
 import { useTournamentListRealtime } from "@/hooks/useRealtimeSubscription";
 import {
@@ -23,7 +26,9 @@ import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { TournamentCard } from "@/components/tournament/TournamentCard";
 import { TournamentFilters } from "@/components/tournament/TournamentFilters";
-import { i } from "node_modules/vite/dist/node/chunks/moduleRunnerTransport";
+import { featureFlagsIntegration } from "@sentry/react";
+import { createReactRouterV6CompatibleTracingIntegration } from "node_modules/@sentry/react/build/types/reactrouter-compat-utils";
+import { JSONSchemaGenerator } from "zod/v4/core";
 
 type Tab = "my" | "public";
 
