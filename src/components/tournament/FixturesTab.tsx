@@ -1,5 +1,5 @@
 import { useMatches } from "@/hooks/useMatches";
-import { useScoreModal, useTournamentStore } from "@/stores/tournamentStore";
+import { useScoreModal } from "@/stores/tournamentStore";
 import { MatchCard } from '@/components/tournament/MatchCard'
 import Modal from '@/components/ui/Modal'
 import { LogScoreForm } from '@/components/tournament/LogScoreForm'
@@ -23,7 +23,7 @@ export function FixturesTab({ tournamentId }: { tournamentId: string }) {
                 )}
 
                 <Modal isOpen={isOpen} onClose={close} title="Log Match Score">
-                    {matchId && <LoogScoreForm matchId={matchId} onClose = {close} />}
+                    {matchId && <LogScoreForm matchId={matchId} onClose = {close} />}
                 </Modal>
         </div>
     )

@@ -40,7 +40,7 @@ interface UserStats {
 
 export default function ProfileView() {
   const user = useUser()
-  const { refreshUser } = useAuthStore()
+  const { fetchProfile } = useAuthStore()
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -79,7 +79,7 @@ export default function ProfileView() {
           .select('*', { count: 'exact', head: true })
           .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
 
-        const memberSince = new Date(user.createdAt || Date.now())
+        const memberSince = new Date(Date.now())
           .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
         setStats({
@@ -153,7 +153,7 @@ export default function ProfileView() {
 
       if (error) throw error
 
-      await refreshUser()
+      await fetchProfile()
       setSaveStatus('saved')
       
       setTimeout(() => setSaveStatus('idle'), 3000)

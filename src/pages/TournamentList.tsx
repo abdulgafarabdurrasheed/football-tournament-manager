@@ -5,40 +5,29 @@ import {
   Search,
   Filter,
   Trophy,
-  Users,
-  Calendar,
   Loader2,
-  School,
-  Badge,
-  Download,
-  Ambulance,
 } from "lucide-react";
-import { checkVariantsDidChange, easeIn, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useMyTournaments, usePublicTournaments } from "@/hooks/useTournament";
 import { useTournamentListRealtime } from "@/hooks/useRealtimeSubscription";
 import {
   useTournamentStore,
   useTournamentFilters,
 } from "@/stores/tournamentStore";
-import { useUser } from "@/stores/authStores";
 import { AnimatedPage } from "@/components/ui/AnimatedPage";
 import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { TournamentCard } from "@/components/tournament/TournamentCard";
 import { TournamentFilters } from "@/components/tournament/TournamentFilters";
-import { featureFlagsIntegration } from "@sentry/react";
-import { createReactRouterV6CompatibleTracingIntegration } from "node_modules/@sentry/react/build/types/reactrouter-compat-utils";
-import { JSONSchemaGenerator } from "zod/v4/core";
 
 type Tab = "my" | "public";
 
 export default function TournamentList() {
-  const user = useUser();
   const [activeTab, setActiveTab] = useState<Tab>("my");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const filters = useTournamentFilters();
-  const { setFilters, resetFilters } = useTournamentStore;
+  const { setFilters, resetFilters } = useTournamentStore();
 
   const { data: myTournaments, isLoading: myLoading } = useMyTournaments();
 
@@ -141,14 +130,14 @@ export default function TournamentList() {
         </div>
 
         <Button
-          variant="outline"
+          variant="ghost"
           onClick={() => setShowFilters(!showFilters)}
           className={showFilters ? "border-yellow-500" : ""}
         >
           <Filter className="w-4 h-4 mr-2" />
           Filters
           {(filters.status.length > 0 || filters.format.length > 0) && (
-            <span className="ml-2 px-1 5 py-0 5 text-xs bg-yellow-500 text-slate-900 rounded">
+            <span className="ml-2 px-1.5 py-0.5 text-xs bg-yellow-500 text-slate-900 rounded">
               {filters.status.length + filters.format.length}
             </span>
           )}
@@ -164,7 +153,7 @@ export default function TournamentList() {
         >
           <TournamentFilters
             filters={filters}
-            setFilters={setFilters}
+            onChange={setFilters}
             onReset={resetFilters}
           />
         </motion.div>

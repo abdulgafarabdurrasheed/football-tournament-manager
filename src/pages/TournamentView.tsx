@@ -1,8 +1,8 @@
-import { useParams, useNavigate, Outlet, NavLink } from 'react-router-dom'
+import { useParams, Outlet, NavLink } from 'react-router-dom'
 import { useTournament } from '@/hooks/useTournament'
 import { useTournamentDetailRealtime } from '@/hooks/useRealtimeSubscription'
-import { useActiveTournamentId, useTournamentStore } from '@/stores/tournamentStore'
-import { Loader2, Trophy, Users, Table, BarChart2, GitBranch, Settings } from 'lucide-react'
+import { useTournamentStore } from '@/stores/tournamentStore'
+import { Loader2, Trophy, Table, BarChart2, GitBranch, Settings } from 'lucide-react'
 import { useEffect } from 'react'
 
 const TABS = [
@@ -15,9 +15,8 @@ const TABS = [
 
 export default function TournamentView() {
     const { tournamentId } = useParams()
-    const navigate = useNavigate()
     const { data: tournament, isLoading, error } = useTournament(tournamentId || null)
-    const setActiveTournament = useTournamentStore()
+    const setActiveTournament = useTournamentStore((s) => s.setActiveTournament)
     useTournamentDetailRealtime(tournamentId || null)
 
     useEffect(() => {

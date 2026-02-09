@@ -16,7 +16,7 @@ interface StatItem {
 }
 
 interface DashboardProps {
-  user: User | null;
+  user?: User | null;
 }
 
 function Dashboard({ user }: DashboardProps) {
