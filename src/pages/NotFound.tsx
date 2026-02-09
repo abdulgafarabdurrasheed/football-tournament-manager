@@ -16,7 +16,7 @@ function NotFound() {
       <div className="flex gap-4">
         <Button 
           variant="secondary" 
-          onClick={() => navigate(-1)}
+          onClick={() => window.history.length > 2 ? navigate(-1) : navigate('/')}
         >
           <ArrowLeft size={16} className="mr-2" />
           Go Back

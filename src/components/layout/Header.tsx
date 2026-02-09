@@ -15,7 +15,7 @@ export function Header() {
           <div className="bg-gradient-to-br from-yellow-400 to-orange-600 p-2 rounded-lg text-black shadow-lg shadow-orange-500/20">
             <Trophy size={20} strokeWidth={2.5}/>
           </div>
-          <h1 className="text-white text-xl font-lack tracking-tight hidden sm:block">Football <span className='text-yellow-500'>Tournament Manager</span></h1>
+          <h1 className="text-white text-xl font-black tracking-tight hidden sm:block">Football <span className='text-yellow-500'>Tournament Manager</span></h1>
         </Link>
 
         <div className="hidden sm:block">

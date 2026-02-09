@@ -1,5 +1,3 @@
-import { Variable } from "lucide-react";
-
 interface ButtonProps {
 	children: React.ReactNode;
 	onClick?: () => void;
@@ -30,9 +28,10 @@ export function Button({
 
 	return (
 		<button
+			type={type}
 			onClick={onClick}
 			disabled={disabled || loading}
-			className={`${baseStyles} ${variants[variant]}`}
+			className={`${baseStyles} ${variants[variant]} ${className}`}
 		>
 			{loading ? (
 				<span className="flex items-center gap-2">

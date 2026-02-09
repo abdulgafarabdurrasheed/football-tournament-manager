@@ -26,7 +26,7 @@ export function StandingsTab({ tournamentId }: { tournamentId: string }) {
                 </thead>
                 <tbody>
                     {standings.map((entry, i) => (
-                        <tr key={entry.managerId} className="text-white">
+                        <tr key={entry.manager.id} className="text-white">
                             <td className="px-4 py-2 text-center">{i + 1}</td>
                             <td className="px-4 py-2">{entry.manager.team_name}</td>
                             <td className="px-2 text-center">{entry.played}</td>

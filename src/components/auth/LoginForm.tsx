@@ -79,15 +79,6 @@ export function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormProps) {
         )}
       </div>
 
-      <div className="text-right">
-        <button
-          type="button"
-          className="text-sm text-slate-400 hover:text-yellow-500 transition-colors"
-        >
-          Forgot password?
-        </button>
-      </div>
-
       <Button type="submit" disabled={isSubmitting} className="w-full">
         {isSubmitting ? (
           <>

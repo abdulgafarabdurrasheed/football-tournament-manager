@@ -1,11 +1,12 @@
 import  Card from '../components/ui/Card'
 import { Trophy, Users, Calendar, BarChart3, type LucideIcon } from "lucide-react";
+import { useUser } from '@/stores/authStores'
 
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    avatar?: string;
+const ICON_COLORS: Record<string, string> = {
+  yellow: 'text-yellow-500',
+  blue: 'text-blue-500',
+  green: 'text-green-500',
+  purple: 'text-purple-500',
 }
 
 interface StatItem {
@@ -15,16 +16,14 @@ interface StatItem {
     color: string;
 }
 
-interface DashboardProps {
-  user?: User | null;
-}
+function Dashboard() {
+  const user = useUser()
 
-function Dashboard({ user }: DashboardProps) {
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-3xl font-black text-white">
-          Welcome, {user?.name.split(" ")[0] || 'Manager'}!
+          Welcome, {user?.displayName?.split(" ")[0] || user?.email?.split("@")[0] || 'Manager'}!
         </h2>
         <p className="text-slate-400 mt-1">Ready to Manage your Tournaments?</p>
       </div>
@@ -49,7 +48,7 @@ function Dashboard({ user }: DashboardProps) {
         ).map((stat) => (
           <Card key={stat.label} className="text-center">
             <stat.icon
-              className={`mx-auto mb-2 text-${stat.color}-500`}
+              className={`mx-auto mb-2 ${ICON_COLORS[stat.color]}`}
               size={24}
             />
             <p className="text-2xl font-black text-white">{stat.value}</p>
