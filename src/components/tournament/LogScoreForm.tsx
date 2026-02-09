@@ -3,7 +3,7 @@ import { useLogScore } from '@/hooks/useMatches'
 
 export function LogScoreForm({ matchId, onClose }: { matchId: string, onClose: () => void }) {
     const { register, handleSubmit, formState: { isSubmitting } } = useForm()
-    const { logScore } = useLogScore()
+    const logScore = useLogScore()
 
     const onSubmit = async (data: any) => {
         await logScore.mutateAsync({
