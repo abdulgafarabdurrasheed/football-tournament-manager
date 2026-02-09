@@ -1,80 +1,156 @@
-import { useParams, Outlet, NavLink } from 'react-router-dom'
-import { useTournament } from '@/hooks/useTournament'
-import { useTournamentDetailRealtime } from '@/hooks/useRealtimeSubscription'
-import { useTournamentStore } from '@/stores/tournamentStore'
-import { Loader2, Trophy, Table, BarChart2, GitBranch, Settings } from 'lucide-react'
-import { useEffect } from 'react'
-
-const TABS = [
-    { id: 'fixtures', label: 'Fixtures', icon: Table },
-    { id: 'standings', label: 'Standings', icon: BarChart2 },
-    { id: 'bracket', label: 'Bracket', icon: GitBranch },
-    { id: 'stats', label: 'Stats', icon: Trophy },
-    { id: 'admin', label: 'Admin', icon: Settings },
-]
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
+import { useTournament } from "@/hooks/useTournament";
+import { useMatches } from "@/hooks/useMatches";
+import { useManagers, useMyManager, useIsAdmin } from "@/hooks/useManager";
+import { useTournamentDetailRealtime } from "@/hooks/useRealtimeSubscription";
+import { useTournamentStore, useViewMode } from "@/stores/tournamentStore";
+import { AnimatedPage } from "@/components/ui/AnimatedPage";
+import { Button } from "@/components/ui/Button";
+import { TournamentHeader } from "@/components/tournament/TournamentHeader";
+import { TournamentTabs } from "@/components/tournament/TournamentTabs";
+import { FixturesTab } from "@/components/tournament/FixturesTab";
+import { StandingsTab } from "@/components/tournament/StandingsTab";
+import { StatsTab } from "@/components/tournament/StatsTab";
+import { BracketTab } from "@/components/tournament/BracketTab";
+import { AdminTab } from "@/components/tournament/AdminTab";
+import { ScoreModal } from "@/components/tournament/ScoreModal";
 
 export default function TournamentView() {
-    const { tournamentId } = useParams()
-    const { data: tournament, isLoading, error } = useTournament(tournamentId || null)
-    const setActiveTournament = useTournamentStore((s) => s.setActiveTournament)
-    useTournamentDetailRealtime(tournamentId || null)
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const viewMode = useViewMode();
+  const { setActiveTournament } = useTournamentStore();
 
-    useEffect(() => {
-        setActiveTournament(tournamentId || null)
-        return () => setActiveTournament(null)
-    }, [tournamentId, setActiveTournament])
+  const {
+    data: tournament,
+    isLoading: tLoading,
+    error: tError,
+  } = useTournament(id ?? null);
+  const { data: matches, isLoading: mLoading } = useMatches(id ?? null);
+  const { data: managers, isLoading: mgLoading } = useManagers(id ?? null);
+  const myManager = useMyManager(id ?? null);
+  const isAdmin = useIsAdmin(id ?? null);
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center py-24">
-                <Loader2 className="animate-spin h-8 w-8 text-yellow-500" />
-            </div>
-        )
-    }
+  useTournamentDetailRealtime(id ?? null);
 
-    if (error || !tournament) {
-        return (
-            <div className="text-center py-24 text-red-400">Error loading tournament data.</div>
-        )
-    }
+  if (id) setActiveTournament(id);
 
+  if (tLoading || mLoading || mgLoading) {
     return (
-        <div className="max-w-5xl mx-auto px-4 py-8">
-            <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-white mb-1">
-                        {tournament.name}
-                    </h1>
-                    <p className="text-slate-400">{tournament.description}</p>
-                </div>
-                <div className="flex gap-2">
-                    <span className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 font-medium">
-                        {tournament.format}
-                    </span>
-                    <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 font-medium">
-                        {tournament.status}
-                    </span>
-                </div>
-            </div>
+      <div className="flex items-center justify-center min-h-[50vh">
+        <Loader2 className="w-8 h-8 text-yellow-500 animate-sp" />
+      </div>
+    );
+  }
 
-            <div className="flex gap-2 mb-8 border-b border-slate-700">
-                {TABS.map(tab => (
-                    <NavLink
-                        key={tab.id}
-                        to={tab.id}
-                        className={({ isActive }) =>
-                            `px-4 py-2 -mb-px border-b-2 font-medium flex items-center gap-2 transition-colors ${
-                                isActive ? 'border-yellow-500 text-yellow-400' : 'border-transparent text-slate-400 hover:text-white'
-                            }`
-                            }
-                            end
-                        >
-                            <tab.icon className="h-4 w-4" />
-                            {tab.label}
-                        </NavLink>
-                ))}
-            </div>
-            <Outlet />
-        </div>
-    )
+  if (tError || !tournament) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <AlertTriangle className="w-12 h-12 text-red-500" />
+        <h2 className="text-xl font-bold text-white">
+          Error loading tournament data. Tournament Not Found
+        </h2>
+        <p className="text-slate-400">
+          {tError?.message || "This Tournament may have been deleted"}
+        </p>
+        <Button variant="ghost" onClick={() => navigate("/tournaments")}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Tournaments
+        </Button>
+      </div>
+    );
+  }
+
+  const hasGroupStage =
+    tournament.format === "LEAGUE" ||
+    tournament.format === "HYBRID_MULTI_GROUP" ||
+    tournament.format === "HYBRID_SINGLE_LEAGUE";
+
+  const hasKnockout =
+    tournament.format === "KNOCKOUT" || tournament.format.startsWith("HYBRID");
+
+  const renderTabContent = () => {
+    switch (viewMode) {
+      case "fixtures":
+        return (
+          <FixturesTab
+            matches={matches ?? []}
+            managers={managers ?? []}
+            tournament={tournament}
+            isAdmin={isAdmin}
+          />
+        );
+      case "standings":
+        return hasGroupStage ? (
+          <StandingsTab
+            matches={matches ?? []}
+            managers={managers ?? []}
+            tournament={tournament}
+          />
+        ) : null;
+      case "bracket":
+        return hasKnockout ? (
+          <BracketTab
+            matches={matches ?? []}
+            managers={managers ?? []}
+            tournament={tournament}
+          />
+        ) : null;
+      case "stats":
+        return (
+          <StatsTab
+            matches={matches ?? []}
+            managers={managers ?? []}
+            tournamentId={tournament.id}
+          />
+        );
+      case "admin":
+        return isAdmin ? (
+          <AdminTab
+            tournament={tournament}
+            managers={managers ?? []}
+            matches={matches ?? []}
+          />
+        ) : null;
+
+      default:
+        return (
+          <FixturesTab
+            matches={matches ?? []}
+            managers={managers ?? []}
+            tournament={tournament}
+            isAdmin={isAdmin}
+          />
+        );
+    }
+  };
+
+  return (
+    <AnimatedPage className="max-w-6xl mx-auto px-4 py-6">
+      <Button
+        variant="ghost"
+        onClick={() => navigate("/tournaments")}
+        className="mb-4"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Tournaments
+      </Button>
+
+      <TournamentHeader
+        tournament={tournament}
+        managers={managers ?? []}
+        myManager={myManager}
+      />
+      <TournamentTabs
+        format={tournament.format}
+        status={tournament.status}
+        isAdmin={isAdmin}
+      />
+
+      <div className="mt-6">{renderTabContent()}</div>
+
+      <ScoreModal />
+    </AnimatedPage>
+  );
 }
