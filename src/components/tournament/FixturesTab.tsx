@@ -2,7 +2,7 @@ import { useMatches } from "@/hooks/useMatches";
 import { useScoreModal, useTournamentStore } from "@/stores/tournamentStore";
 import { MatchCard } from '@/components/tournament/MatchCard'
 import Modal from '@/components/ui/Modal'
-import { LoogScoreForm } from '@/compone'
+import { LogScoreForm } from '@/components/tournament/LogScoreForm'
 
 export function FixturesTab({ tournamentId }: { tournamentId: string }) {
     const { data: matches, isLoading } = useMatches(tournamentId)
