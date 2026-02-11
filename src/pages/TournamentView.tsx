@@ -9,7 +9,7 @@ import { AnimatedPage } from "@/components/ui/AnimatedPage";
 import { Button } from "@/components/ui/Button";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
 import { TournamentTabs } from "@/components/tournament/TournamentTabs";
-import { FixturesTab } from "@/components/tournament/FixturesTab";
+import { FixturesTab } from "@/components/tournament/tabs/FixturesTab";
 import { StandingsTab } from "@/components/tournament/StandingsTab";
 import { StatsTab } from "@/components/tournament/StatsTab";
 import { BracketTab } from "@/components/tournament/BracketTab";
