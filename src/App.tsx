@@ -10,6 +10,7 @@ import { ProtectedRoute } from "./components/auth";
 import { AuthCallback } from "@/pages/AuthCallback";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { Toaster } from "@/components/ui/sonner";
+import { TourOverlay } from "@/components/tour/TourOverlay";
 import { Loader2 } from "lucide-react"; 
 
 const TournamentList = lazy(() => import('@/pages/TournamentList'));
@@ -95,6 +96,7 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
+        <TourOverlay />
         <Toaster />
       </BrowserRouter>
     </ErrorBoundary>
@@ -109,7 +111,6 @@ function LoadingSpinner() {
   );
 }
 
-/** Redirect authenticated users to /dashboard, show landing page otherwise */
 function HomeRedirect() {
   const isAuthenticated = useIsAuthenticated();
   const isLoading = useAuthLoading();

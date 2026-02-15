@@ -49,7 +49,7 @@ export function StandingsTab({
     );
   }
   return (
-    <div className="space-y-8">
+    <div data-tour="standings-content" className="space-y-8">
       {Array.from(standings.entries()).map(([groupNumber, groupStandings]) => (
         <div key={groupNumber}>
           {isGroupFormat && (

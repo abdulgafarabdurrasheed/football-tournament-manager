@@ -6,6 +6,8 @@ import { useMatches } from "@/hooks/useMatches";
 import { useManagers, useMyManager, useIsAdmin } from "@/hooks/useManager";
 import { useTournamentDetailRealtime } from "@/hooks/useRealtimeSubscription";
 import { useTournamentStore, useViewMode } from "@/stores/tournamentStore";
+import { useIsDemoMode } from "@/stores/demoStore";
+import { demoTournament, demoMatches, demoManagers, DEMO_TOURNAMENT_ID_CONST } from "@/data/demoData";
 import { AnimatedPage } from "@/components/ui/AnimatedPage";
 import { Button } from "@/components/ui/Button";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
@@ -22,24 +24,32 @@ export default function TournamentView() {
   const navigate = useNavigate();
   const viewMode = useViewMode();
   const { setActiveTournament } = useTournamentStore();
+  const isDemoMode = useIsDemoMode();
+
+  const isDemoTournament = isDemoMode && id === DEMO_TOURNAMENT_ID_CONST;
 
   const {
     data: tournament,
     isLoading: tLoading,
     error: tError,
-  } = useTournament(id ?? null);
-  const { data: matches, isLoading: mLoading } = useMatches(id ?? null);
-  const { data: managers, isLoading: mgLoading } = useManagers(id ?? null);
-  const myManager = useMyManager(id ?? null);
-  const isAdmin = useIsAdmin(id ?? null);
+  } = useTournament(isDemoTournament ? null : (id ?? null));
+  const { data: matches, isLoading: mLoading } = useMatches(isDemoTournament ? null : (id ?? null));
+  const { data: managers, isLoading: mgLoading } = useManagers(isDemoTournament ? null : (id ?? null));
+  const myManager = useMyManager(isDemoTournament ? null : (id ?? null));
+  const isAdmin = useIsAdmin(isDemoTournament ? null : (id ?? null));
 
-  useTournamentDetailRealtime(id ?? null);
+  useTournamentDetailRealtime(isDemoTournament ? null : (id ?? null));
+  const activeTournament = isDemoTournament ? demoTournament : tournament;
+  const activeMatches = isDemoTournament ? demoMatches : (matches ?? []);
+  const activeManagers = isDemoTournament ? demoManagers : (managers ?? []);
+  const activeIsAdmin = isDemoTournament ? true : isAdmin;
+  const activeMyManager = isDemoTournament ? demoManagers[0] : myManager;
 
   useEffect(() => {
     if (id) setActiveTournament(id);
   }, [id, setActiveTournament]);
 
-  if (tLoading || mLoading || mgLoading) {
+  if (!isDemoTournament && (tLoading || mLoading || mgLoading)) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
@@ -47,7 +57,7 @@ export default function TournamentView() {
     );
   }
 
-  if (tError || !tournament) {
+  if (!isDemoTournament && (tError || !tournament)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
         <AlertTriangle className="w-12 h-12 text-red-500" />
@@ -66,64 +76,64 @@ export default function TournamentView() {
   }
 
   const hasGroupStage =
-    tournament.format === "LEAGUE" ||
-    tournament.format === "HYBRID_MULTI_GROUP" ||
-    tournament.format === "HYBRID_SINGLE_LEAGUE";
+    activeTournament!.format === "LEAGUE" ||
+    activeTournament!.format === "HYBRID_MULTI_GROUP" ||
+    activeTournament!.format === "HYBRID_SINGLE_LEAGUE";
 
   const hasKnockout =
-    tournament.format === "KNOCKOUT" || tournament.format.startsWith("HYBRID");
+    activeTournament!.format === "KNOCKOUT" || activeTournament!.format.startsWith("HYBRID");
 
   const renderTabContent = () => {
     switch (viewMode) {
       case "fixtures":
         return (
           <FixturesTab
-            matches={matches ?? []}
-            managers={managers ?? []}
-            tournament={tournament}
-            isAdmin={isAdmin}
+            matches={activeMatches}
+            managers={activeManagers}
+            tournament={activeTournament!}
+            isAdmin={activeIsAdmin}
           />
         );
       case "standings":
         return hasGroupStage ? (
           <StandingsTab
-            matches={matches ?? []}
-            managers={managers ?? []}
-            tournament={tournament}
+            matches={activeMatches}
+            managers={activeManagers}
+            tournament={activeTournament!}
           />
         ) : null;
       case "bracket":
         return hasKnockout ? (
           <BracketTab
-            matches={matches ?? []}
-            managers={managers ?? []}
-            tournament={tournament}
+            matches={activeMatches}
+            managers={activeManagers}
+            tournament={activeTournament!}
           />
         ) : null;
       case "stats":
         return (
           <StatsTab
-            matches={matches ?? []}
-            managers={managers ?? []}
-            tournamentId={tournament.id}
+            matches={activeMatches}
+            managers={activeManagers}
+            tournamentId={activeTournament!.id}
           />
         );
       case "admin":
-        return isAdmin ? (
+        return activeIsAdmin ? (
           <AdminTab
-            tournament={tournament}
-            managers={managers ?? []}
-            matches={matches ?? []}
+            tournament={activeTournament!}
+            managers={activeManagers}
+            matches={activeMatches}
           />
         ) : null;
 
       default:
         return (
           <FixturesTab
-            matches={matches ?? []}
-            managers={managers ?? []}
-            tournament={tournament}
-            isAdmin={isAdmin}
+            matches={activeMatches}
+            managers={activeManagers}
+            tournament={activeTournament!}
+            isAdmin={activeIsAdmin}
           />
         );
     }
@@ -140,20 +150,22 @@ export default function TournamentView() {
         Back to Tournaments
       </Button>
 
-      <TournamentHeader
-        tournament={tournament}
-        managers={managers ?? []}
-        myManager={myManager}
-      />
+      <div data-tour="tournament-header">
+        <TournamentHeader
+          tournament={activeTournament!}
+          managers={activeManagers}
+          myManager={activeMyManager}
+        />
+      </div>
       <TournamentTabs
-        format={tournament.format}
-        status={tournament.status}
-        isAdmin={isAdmin}
+        format={activeTournament!.format}
+        status={activeTournament!.status}
+        isAdmin={activeIsAdmin}
       />
 
       <div className="mt-6">{renderTabContent()}</div>
 
-      <ScoreModal />
+      {!isDemoTournament && <ScoreModal />}
     </AnimatedPage>
   );
 }

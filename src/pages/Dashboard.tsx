@@ -7,9 +7,9 @@ import {
   TrendingUp,
   Clock,
   ArrowRight,
-  Sparkles,
 } from "lucide-react";
 import { useUser } from "@/stores/authStores";
+import { DemoBanner } from "@/components/tour/DemoBanner";
 
 function Dashboard() {
   const user = useUser();
@@ -20,12 +20,10 @@ function Dashboard() {
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-      {/* Welcome Banner */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-yellow-500/10 via-slate-900 to-slate-900 border border-slate-800 p-8 md:p-10">
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br via-slate-900 to-slate-900 border border-slate-800 p-8 md:p-10">
         <div className="absolute top-0 right-0 w-72 h-72 bg-yellow-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
         <div className="relative">
           <div className="flex items-center gap-2 text-yellow-500 text-sm font-semibold mb-2">
-            <Sparkles size={16} />
             <span>Welcome back</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-black text-white">
@@ -38,8 +36,9 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Quick Actions */}
-      <section>
+      <DemoBanner />
+
+      <section data-tour="quick-actions">
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
           Quick Actions
         </h2>
@@ -97,8 +96,7 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Stats Overview */}
-      <section>
+      <section data-tour="dashboard-stats">
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
           Overview
         </h2>
@@ -149,7 +147,6 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Recent Activity */}
       <section>
         <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
           Recent Activity

@@ -180,7 +180,6 @@ export function useCreateTournament() {
       
       if (error) throw error
       
-      // Add the creator as the OWNER manager
       const { error: managerError } = await supabase
         .from('tournament_managers')
         .insert({
@@ -263,7 +262,6 @@ export function useStartTournament() {
   
   return useMutation({
     mutationFn: async (tournamentId: string) => {
-      // 1. Fetch tournament details
       const { data: tournament, error: tErr } = await supabase
         .from('tournaments')
         .select('*')
@@ -271,7 +269,6 @@ export function useStartTournament() {
         .single()
       if (tErr || !tournament) throw tErr ?? new Error('Tournament not found')
       
-      // 2. Fetch managers/participants
       const { data: managers, error: mErr } = await supabase
         .from('tournament_managers')
         .select('id, user_id, team_name')
@@ -280,7 +277,6 @@ export function useStartTournament() {
       if (mErr) throw mErr
       if (!managers || managers.length < 2) throw new Error('Need at least 2 participants')
       
-      // 3. Generate fixtures client-side
       const settings = tournament.settings as TournamentSettings
       const participants = managers.map(m => ({ id: m.id, teamName: m.team_name ?? 'Unknown' }))
       const { generateFixtures } = await import('@/utils/scheduler')
@@ -297,7 +293,6 @@ export function useStartTournament() {
         }
       )
       
-      // 4. Insert matches
       if (matches.length > 0) {
         const { error: insertErr } = await supabase
           .from('matches')
@@ -305,7 +300,6 @@ export function useStartTournament() {
         if (insertErr) throw insertErr
       }
       
-      // 5. Update tournament status
       const { error: updateErr } = await supabase
         .from('tournaments')
         .update({ status: 'IN_PROGRESS' })

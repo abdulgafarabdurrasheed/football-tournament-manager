@@ -69,7 +69,7 @@ export function FixturesTab({
   }
 
   return (
-    <div>
+    <div data-tour="fixtures-content">
       <div className="flex items-center justify-between mb-6">
         <Button
           variant="ghost"

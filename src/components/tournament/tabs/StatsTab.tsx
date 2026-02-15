@@ -8,6 +8,8 @@ import {
   getTopAssists,
   getTopScorers,
 } from "@/utils/analytics";
+import { useIsDemoMode } from "@/stores/demoStore";
+import { demoPlayerStats, DEMO_TOURNAMENT_ID_CONST } from "@/data/demoData";
 import type {
   MatchWithManagers,
   TournamentManager,
@@ -21,10 +23,14 @@ interface StatsTabProps {
 
 export function StatsTab({ matches, managers, tournamentId }: StatsTabProps) {
   const matchIds = useMemo(() => matches.map((m) => m.id), [matches]);
+  const isDemoMode = useIsDemoMode();
+  const isDemoTournament = isDemoMode && tournamentId === DEMO_TOURNAMENT_ID_CONST;
 
   const { data: playerStats } = useQuery({
     queryKey: queryKeys.playerStats.tournament(tournamentId),
     queryFn: async () => {
+      if (isDemoTournament) return demoPlayerStats;
+
       if (matchIds.length === 0) return [];
       const { data, error } = await supabase
         .from("player_stats")
@@ -34,7 +40,7 @@ export function StatsTab({ matches, managers, tournamentId }: StatsTabProps) {
       if (error) throw error;
       return data;
     },
-    enabled: matchIds.length > 0,
+    enabled: isDemoTournament || matchIds.length > 0,
     staleTime: 1000 * 60,
   });
 
@@ -54,7 +60,7 @@ export function StatsTab({ matches, managers, tournamentId }: StatsTabProps) {
   );
 
   return (
-    <div className="space-y-8">
+    <div data-tour="stats-content" className="space-y-8">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           icon={<Trophy className="w-5 h-5 text-yellow-500" />}

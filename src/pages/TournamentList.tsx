@@ -19,6 +19,9 @@ import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { TournamentCard } from "@/components/tournament/TournamentCard";
 import { TournamentFilters } from "@/components/tournament/TournamentFilters";
+import { useIsDemoMode } from "@/stores/demoStore";
+import { demoTournament, demoManagers } from "@/data/demoData";
+import type { TournamentWithManagers } from "@/types/tournament.types";
 
 type Tab = "my" | "public";
 
@@ -28,6 +31,7 @@ export default function TournamentList() {
   const [showFilters, setShowFilters] = useState(false);
   const filters = useTournamentFilters();
   const { setFilters, resetFilters } = useTournamentStore();
+  const isDemoMode = useIsDemoMode();
 
   const { data: myTournaments, isLoading: myLoading } = useMyTournaments();
 
@@ -38,9 +42,16 @@ export default function TournamentList() {
 
   const filteredTournaments = useMemo(() => {
     const source = activeTab === "my" ? myTournaments : publicTournaments;
-    if (!source) return [];
+    let list = source ? [...source] : [];
+    if (isDemoMode) {
+      const demoEntry: TournamentWithManagers = {
+        ...demoTournament,
+        tournament_managers: demoManagers,
+      };
+      list = [demoEntry, ...list];
+    }
 
-    return source.filter((t) => {
+    return list.filter((t) => {
       if (
         searchQuery &&
         !t.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -62,7 +73,7 @@ export default function TournamentList() {
 
       return true;
     });
-  }, [activeTab, myTournaments, publicTournaments, searchQuery, filters]);
+  }, [activeTab, myTournaments, publicTournaments, searchQuery, filters, isDemoMode]);
 
   const isLoading = activeTab === "my" ? myLoading : publicLoading;
 
@@ -186,7 +197,7 @@ export default function TournamentList() {
           )}
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div data-tour="tournament-list" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredTournaments.map((tournament, index) => (
             <motion.div
               key={tournament.id}
@@ -194,7 +205,7 @@ export default function TournamentList() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              <TournamentCard tournament={tournament} />
+              <TournamentCard tournament={tournament as TournamentWithManagers} />
             </motion.div>
           ))}
         </div>
