@@ -5,11 +5,12 @@ import { X, Loader2, Swords } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useScoreModal } from "@/stores/tournamentStore";
+import { useMatch, useLogScore } from "@/hooks/useMatches";
 import {
   matchScoreSchema,
   knockoutScoreSchema,
-  type MatchScoreData,
-  type KnockoutScoreData,
+  type MatchScoreFormData,
+  type KnockoutScoreFormData,
 } from "@/schemas/tournament.schema";
 import { Button } from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -32,7 +33,7 @@ export function ScoreModal() {
     reset,
     watch,
     formState: { errors },
-  } = useForm<MatchScoreData | KnockoutScoreData>({
+  } = useForm<MatchScoreFormData | KnockoutScoreFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       homeScore: 0,
@@ -49,7 +50,7 @@ export function ScoreModal() {
     }
   }, [match, reset]);
 
-  const onSubmit = async (data: MatchScoreData | KnockoutScoreData) => {
+  const onSubmit = async (data: MatchScoreFormData | KnockoutScoreFormData) => {
     if (!matchId) return;
 
     try {

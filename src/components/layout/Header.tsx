@@ -18,8 +18,22 @@ export function Header() {
           <h1 className="text-white text-xl font-black tracking-tight hidden sm:block">Football <span className='text-yellow-500'>Tournament Manager</span></h1>
         </Link>
 
-        <div className="hidden sm:block">
-          {isAuthenticated ? <UserProfile /> : <LoginButton />}
+        <div className="hidden sm:flex items-center gap-1">
+          {isAuthenticated ? (
+            <>
+              <Link to="/dashboard" className="px-3 py-1.5 text-sm font-medium text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+                Dashboard
+              </Link>
+              <Link to="/tournaments" className="px-3 py-1.5 text-sm font-medium text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+                Tournaments
+              </Link>
+              <div className="ml-2">
+                <UserProfile />
+              </div>
+            </>
+          ) : (
+            <LoginButton />
+          )}
         </div>
 
         <button className="sm:hidden text-slate-400 hover:text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -28,8 +42,22 @@ export function Header() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="sm:hidden border-t border-slate-800 p-4">
-          {isAuthenticated ? <UserProfile /> : <LoginButton className='w-full' />}
+        <div className="sm:hidden border-t border-slate-800 p-4 space-y-2">
+          {isAuthenticated ? (
+            <>
+              <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm font-medium text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+                Dashboard
+              </Link>
+              <Link to="/tournaments" onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2 text-sm font-medium text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+                Tournaments
+              </Link>
+              <div className="pt-2 border-t border-slate-800">
+                <UserProfile />
+              </div>
+            </>
+          ) : (
+            <LoginButton className='w-full' />
+          )}
         </div>
       )}
     </header>

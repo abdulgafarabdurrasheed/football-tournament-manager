@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import { useShallow } from 'zustand/react/shallow'
 
 type ViewMode = 'fixtures' | 'standings' | 'stats' | 'bracket' | 'analytics' | 'admin'
 
@@ -131,12 +132,12 @@ export const useTournamentFilters = () =>
 export const useWizardDraft = () => 
   useTournamentStore((s) => s.wizardDraft)
 export const useScoreModal = () => 
-  useTournamentStore((s) => ({ 
+  useTournamentStore(useShallow((s) => ({ 
     isOpen: s.isScoreModalOpen, 
     matchId: s.selectedMatchId,
     open: s.openScoreModal,
     close: s.closeScoreModal,
-  }))
+  })))
 
 export function initializeWizardDraft() {
   const saved = localStorage.getItem('tournament-wizard-draft')

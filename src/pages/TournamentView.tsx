@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { ArrowLeft, Loader2, AlertTriangle } from "lucide-react";
 import { useTournament } from "@/hooks/useTournament";
 import { useMatches } from "@/hooks/useMatches";
@@ -34,12 +35,14 @@ export default function TournamentView() {
 
   useTournamentDetailRealtime(id ?? null);
 
-  if (id) setActiveTournament(id);
+  useEffect(() => {
+    if (id) setActiveTournament(id);
+  }, [id, setActiveTournament]);
 
   if (tLoading || mLoading || mgLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh">
-        <Loader2 className="w-8 h-8 text-yellow-500 animate-sp" />
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
       </div>
     );
   }

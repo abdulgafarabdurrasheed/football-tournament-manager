@@ -11,11 +11,11 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useJoinTournament, useLeaveTournament } from "@/hooks/useManagers";
+import { useJoinTournament, useLeaveTournament } from "@/hooks/useManager";
 import {
   useStartTournament,
   useUpdateTournament,
-} from "@/hooks/useTournaments";
+} from "@/hooks/useTournament";
 import { useUser } from "@/stores/authStores";
 import { useTournamentStore } from "@/stores/tournamentStore";
 import { Button } from "@/components/ui/Button";

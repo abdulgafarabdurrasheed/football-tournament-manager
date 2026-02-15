@@ -4,7 +4,7 @@ import type { CreateTournamentFormData } from "@/schemas/tournament.schema";
 
 export function ReviewStep() {
   const { getValues } = useFormContext<CreateTournamentFormData>();
-  const values = getValues;
+  const values = getValues();
 
   const formatLabels = {
     LEAGUE: "League (Round Robin)",
@@ -24,7 +24,7 @@ export function ReviewStep() {
       <div className="bg-slate-800/50 rounded-lg p-6 space-y-6">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
-            <Trophy className="w-5 h-5 text-yellow 500" />
+            <Trophy className="w-5 h-5 text-yellow-500" />
           </div>
           <div className="flex-1">
             <h3 className="text-white font-medium">Tournament Details</h3>
@@ -51,9 +51,9 @@ export function ReviewStep() {
           </div>
         </div>
 
-        <div className="flex items-start-gap-4">
-          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex-items-center justify-center">
-            <Users className="w-5 h-5 text-blue 500" />
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+            <Users className="w-5 h-5 text-blue-500" />
           </div>
           <div className="flex-1">
             <h3 className="text-white font-medium">Format</h3>

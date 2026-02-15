@@ -114,7 +114,7 @@ export default function TournamentWizard() {
       });
 
       clearWizardDraft();
-      navigate(`/tournaments/${tournament.id}`);
+      navigate(`/tournament/${tournament.id}`);
     } catch (error) {
       console.error("Failed to create tournament:", error);
     }

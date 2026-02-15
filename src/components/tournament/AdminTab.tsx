@@ -1,5 +1,5 @@
-import { useManagers, useKickPlayer } from '@/hooks/useManagers'
-import { useUpdateTournament, useDeleteTournament } from '@/hooks/useTournaments'
+import { useManagers, useKickPlayer } from '@/hooks/useManager'
+import { useUpdateTournament, useDeleteTournament } from '@/hooks/useTournament'
 
 export function AdminTab({ tournamentId }: { tournamentId: string }) {
   const { data: managers } = useManagers(tournamentId)
