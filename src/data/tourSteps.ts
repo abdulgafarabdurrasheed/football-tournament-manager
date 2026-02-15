@@ -90,7 +90,7 @@ export const TOUR_STEPS: TourStep[] = [
     route: '/tournament/demo-premier-league-2026',
     placement: 'center',
   },
-#
+
   {
     id: 'tour-end',
     title: '🎉 Tour Complete!',
