@@ -11,10 +11,13 @@ export default defineConfig(({ command }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
+    // Default base for local dev and Netlify
     base: "/",
   };
 
-  if (command !== "serve") {
+  // Only use subpath for GitHub Pages
+  // Set VITE_DEPLOY_TARGET=ghpages in the GitHub Actions workflow
+  if (command !== "serve" && process.env.VITE_DEPLOY_TARGET === "ghpages") {
     config.base = "/football-tournament-manager/";
   }
 
