@@ -20,7 +20,7 @@ export function InviteModal({ tournamentId }: InviteModalProps) {
 
   const inviteLink = `${window.location.origin}/tournament/${tournamentId}?invite=true`;
 
-  const handleCopyLinl = async () => {
+  const handleCopyLink = async () => {
     await navigator.clipboard.writeText(inviteLink);
     setCopied(true);
     toast.success("Link Copied");
