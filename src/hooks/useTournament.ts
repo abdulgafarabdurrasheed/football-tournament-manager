@@ -179,6 +179,20 @@ export function useCreateTournament() {
         .single()
       
       if (error) throw error
+      
+      // Add the creator as the OWNER manager
+      const { error: managerError } = await supabase
+        .from('tournament_managers')
+        .insert({
+          tournament_id: tournament.id,
+          user_id: user.id,
+          team_name: user.displayName || 'Team ' + user.id.slice(0, 4),
+          role: 'OWNER',
+          status: 'ACTIVE',
+        })
+      
+      if (managerError) throw managerError
+      
       return tournament
     },
     onSuccess: (tournament) => {
@@ -249,13 +263,56 @@ export function useStartTournament() {
   
   return useMutation({
     mutationFn: async (tournamentId: string) => {
+      // 1. Fetch tournament details
+      const { data: tournament, error: tErr } = await supabase
+        .from('tournaments')
+        .select('*')
+        .eq('id', tournamentId)
+        .single()
+      if (tErr || !tournament) throw tErr ?? new Error('Tournament not found')
       
-      const { data, error } = await supabase.rpc('start_tournament', {
-        p_tournament_id: tournamentId
-      })
+      // 2. Fetch managers/participants
+      const { data: managers, error: mErr } = await supabase
+        .from('tournament_managers')
+        .select('id, user_id, team_name')
+        .eq('tournament_id', tournamentId)
+        .eq('status', 'ACTIVE')
+      if (mErr) throw mErr
+      if (!managers || managers.length < 2) throw new Error('Need at least 2 participants')
       
-      if (error) throw error
-      return data
+      // 3. Generate fixtures client-side
+      const settings = tournament.settings as TournamentSettings
+      const participants = managers.map(m => ({ id: m.id, teamName: m.team_name ?? 'Unknown' }))
+      const { generateFixtures } = await import('@/utils/scheduler')
+      
+      const matches = generateFixtures(
+        tournament.format as 'LEAGUE' | 'KNOCKOUT' | 'HYBRID_MULTI_GROUP' | 'HYBRID_SINGLE_LEAGUE',
+        participants,
+        {
+          tournamentId,
+          doubleLeg: (settings?.legsPerMatch ?? 1) > 1,
+          groupSize: settings?.groupSize ?? 4,
+          teamsAdvancing: settings?.teamsAdvancing ?? 2,
+          hasThirdPlace: settings?.hasThirdPlace ?? false,
+        }
+      )
+      
+      // 4. Insert matches
+      if (matches.length > 0) {
+        const { error: insertErr } = await supabase
+          .from('matches')
+          .insert(matches)
+        if (insertErr) throw insertErr
+      }
+      
+      // 5. Update tournament status
+      const { error: updateErr } = await supabase
+        .from('tournaments')
+        .update({ status: 'IN_PROGRESS' })
+        .eq('id', tournamentId)
+      if (updateErr) throw updateErr
+      
+      return { tournamentId, matchCount: matches.length }
     },
     onSuccess: (_, tournamentId) => {
       queryClient.invalidateQueries({ 

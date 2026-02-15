@@ -165,7 +165,7 @@ export default function TournamentWizard() {
       </h2>
 
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <div>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -195,7 +195,11 @@ export default function TournamentWizard() {
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
-              <Button type="submit" disabled={isSubmitting}>
+              <Button
+                type="button"
+                onClick={() => handleSubmit(onSubmit)()}
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -210,7 +214,7 @@ export default function TournamentWizard() {
               </Button>
             )}
           </div>
-        </form>
+        </div>
       </FormProvider>
     </AnimatedPage>
   );
