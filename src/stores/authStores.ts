@@ -83,6 +83,7 @@ export const useAuthStore = create<AuthState>()(
                 set({ 
                   session, 
                   user: mapUser(session.user),
+                  isLoading: false,
                 })
                 get().fetchProfile()
               } else if (event === 'SIGNED_OUT') {

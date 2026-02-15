@@ -5,7 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 import ProfileView from "@/pages/ProfileView";
-import { useAuthStore } from "./stores/authStores";
+import { useAuthStore, useIsAuthenticated, useAuthLoading } from "./stores/authStores";
 import { ProtectedRoute } from "./components/auth";
 import { AuthCallback } from "@/pages/AuthCallback";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -41,7 +41,7 @@ export default function App() {
           <Header />
 
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<HomeRedirect />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
 
             <Route
@@ -107,4 +107,20 @@ function LoadingSpinner() {
       <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
     </div>
   );
+}
+
+/** Redirect authenticated users to /dashboard, show landing page otherwise */
+function HomeRedirect() {
+  const isAuthenticated = useIsAuthenticated();
+  const isLoading = useAuthLoading();
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <LandingPage />;
 }
