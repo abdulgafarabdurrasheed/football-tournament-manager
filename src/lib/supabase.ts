@@ -99,11 +99,11 @@ export async function updateProfile(
 }
 
 export async function createGameplan(
-	gampeplan: Database['public']['Tables']['gameplans']['Insert']
+	gameplan: Database['public']['Tables']['gameplans']['Insert']
 ) {
 	const { data, error } = await supabase
 		.from('gameplans')
-		.insert(gampeplan)
+		.insert(gameplan)
 		.select()
 		.single();
 

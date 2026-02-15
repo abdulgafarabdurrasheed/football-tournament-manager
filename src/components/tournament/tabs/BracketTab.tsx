@@ -24,8 +24,7 @@ export function BracketTab({ matches, managers, tournament }: BracketTabProps) {
         (m) =>
           m.match_type === "KNOCKOUT" ||
           m.match_type === "FINAL" ||
-          m.match_type === "THIRD_PLACE" ||
-          m.match_type === "SEMI_FINAL",
+          m.match_type === "THIRD_PLACE",
       )
       .sort((a, b) => {
         if (a.round !== b.round) return a.round - b.round;

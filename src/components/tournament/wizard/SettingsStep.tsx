@@ -28,7 +28,7 @@ export function SettingsStep() {
             <div className="space-y-2">
               <Label htmlFor="pointsForWin">Points for Win</Label>
               <Input
-                {...register("pointsForDraw", { valueAsNumber: true })}
+                {...register("pointsForWin", { valueAsNumber: true })}
                 id="pointsForWin"
                 type="number"
                 min={0}
@@ -143,7 +143,7 @@ export function SettingsStep() {
 
       {showKnockoutSettings && (
         <div className="space-y-4">
-          <h3 className="text-lg font-medium-text-white">Knockout Stage</h3>
+          <h3 className="text-lg font-medium text-white">Knockout Stage</h3>
           <div className="flex items-center gap-3">
             <button
               type="button"

@@ -20,7 +20,7 @@ export function BasicInfoStep() {
                 <Label htmlFor="name">Tournament Name *</Label>
                 <Input {...register('name')} id="name" placeholder="Premier League 2026" className={errors.name ? "border-red-500" : ""} />
                 {errors.name && (
-                    <p className="text-red-400-text-sm">{errors.name.message}</p>
+                    <p className="text-red-400 text-sm">{errors.name.message}</p>
                 )}
             </div>
 

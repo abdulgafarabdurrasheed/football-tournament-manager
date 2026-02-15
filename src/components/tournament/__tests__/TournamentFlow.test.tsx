@@ -1,8 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter } from 'react-router-dom'
+import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
@@ -28,36 +24,16 @@ vi.mock('@/lib/supabase', () => ({
   },
 }))
 
-vi.mock('@/stores/authStore', () => ({
+vi.mock('@/stores/authStores', () => ({
   useUser: vi.fn(() => ({ id: 'user-1', email: 'test@example.com' })),
   useAuthStore: vi.fn(() => ({
     user: { id: 'user-1', email: 'test@example.com' },
   })),
 }))
 
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  })
-  
-  return function Wrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          {children}
-        </BrowserRouter>
-      </QueryClientProvider>
-    )
-  }
-}
-
 import { 
   generateRoundRobin, 
   generateKnockoutBracket, 
-  generateHybridMultiGroup,
   getNextKnockoutMatch,
   getWinnerSlot,
 } from '@/utils/scheduler'

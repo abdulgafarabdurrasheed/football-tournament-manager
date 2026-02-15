@@ -69,7 +69,7 @@ export function TournamentHeader({
       await joinTournament.mutateAsync({
         tournamentId: tournament.id,
         teamName:
-          user.user_metadata?.display_name || "Team " + user.id.slice(0, 4),
+          user.displayName || "Team " + user.id.slice(0, 4),
       });
       toast.success("Joined tournament!");
     } catch (err: any) {

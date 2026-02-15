@@ -21,7 +21,6 @@ import type {
   TournamentManager,
   MatchWithManagers,
 } from "@/types/tournament.types";
-import { Toast } from "@radix-ui/react-toast";
 
 interface AdminTabProps {
   tournament: Tournament;

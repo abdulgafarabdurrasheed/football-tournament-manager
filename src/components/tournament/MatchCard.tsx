@@ -2,7 +2,7 @@ import { Clock, Check, Swords, Timer, Star } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { MatchWithManagers } from "@/types/tournament.types";
 
-interface MatchCarProps {
+interface MatchCardProps {
   match: MatchWithManagers;
   canEdit: boolean;
   onLogScore: () => void;
@@ -12,11 +12,12 @@ const DECIDED_BY_LABELS = {
   NORMAL: "",
   EXTRA_TIME: "AET",
   PENALTIES: "PEN",
+  AWAY_GOALS: "AGR",
 };
 
-export function MatchCard({ match, canEdit, onLogScore }: MatchCarProps) {
+export function MatchCard({ match, canEdit, onLogScore }: MatchCardProps) {
   const isCompleted = match.status === "COMPLETED";
-  const isLive = match.status === "LIVE";
+  const isLive = match.status === "IN_PROGRESS";
 
   const homeName = match.home_manager?.team_name ?? "TBD";
   const awayName = match.away_manager?.team_name ?? "TBD";

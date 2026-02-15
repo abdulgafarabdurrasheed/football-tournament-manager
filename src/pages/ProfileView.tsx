@@ -40,7 +40,7 @@ interface UserStats {
 
 export default function ProfileView() {
   const user = useUser()
-  const { fetchProfile } = useAuthStore()
+  const { fetchProfile, profile } = useAuthStore()
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -72,14 +72,14 @@ export default function ProfileView() {
         const { count: tournamentCount } = await supabase
           .from('tournaments')
           .select('*', { count: 'exact', head: true })
-          .eq('created_by', user.id)
+          .eq('creator_id', user.id)
 
         const { count: matchCount } = await supabase
           .from('matches')
           .select('*', { count: 'exact', head: true })
-          .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
+          .or(`home_manager_id.eq.${user.id},away_manager_id.eq.${user.id}`)
 
-        const memberSince = new Date(Date.now())
+        const memberSince = new Date(profile?.created_at || Date.now())
           .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 
         setStats({

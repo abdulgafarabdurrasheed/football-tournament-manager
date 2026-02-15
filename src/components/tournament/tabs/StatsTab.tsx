@@ -20,17 +20,21 @@ interface StatsTabProps {
 }
 
 export function StatsTab({ matches, managers, tournamentId }: StatsTabProps) {
+  const matchIds = useMemo(() => matches.map((m) => m.id), [matches]);
+
   const { data: playerStats } = useQuery({
     queryKey: queryKeys.playerStats.tournament(tournamentId),
     queryFn: async () => {
+      if (matchIds.length === 0) return [];
       const { data, error } = await supabase
         .from("player_stats")
         .select("*")
-        .eq("tournament_id", tournamentId);
+        .in("match_id", matchIds);
 
       if (error) throw error;
       return data;
     },
+    enabled: matchIds.length > 0,
     staleTime: 1000 * 60,
   });
 

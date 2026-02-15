@@ -1,11 +1,15 @@
-import type { User } from '../../types/database.types'
+interface AppUser {
+    id: string
+    email: string
+    displayName: string | null
+    avatarUrl: string | null
+}
 
-export const mockUser: User = {
+export const mockUser: AppUser = {
     id: 'test-user-123',
     email: 'test-user@example.com',
     displayName: 'Test User',
     avatarUrl: null,
-    createdAt: new Date().toISOString,
 }
 
 export const mockAuthStore = {

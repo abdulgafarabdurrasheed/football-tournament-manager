@@ -11,10 +11,10 @@ import { Button } from "@/components/ui/Button";
 import { TournamentHeader } from "@/components/tournament/TournamentHeader";
 import { TournamentTabs } from "@/components/tournament/TournamentTabs";
 import { FixturesTab } from "@/components/tournament/tabs/FixturesTab";
-import { StandingsTab } from "@/components/tournament/StandingsTab";
-import { StatsTab } from "@/components/tournament/StatsTab";
-import { BracketTab } from "@/components/tournament/BracketTab";
-import { AdminTab } from "@/components/tournament/AdminTab";
+import { StandingsTab } from "@/components/tournament/tabs/StandingsTab";
+import { StatsTab } from "@/components/tournament/tabs/StatsTab";
+import { BracketTab } from "@/components/tournament/tabs/BracketTab";
+import { AdminTab } from "@/components/tournament/tabs/AdminTab";
 import { ScoreModal } from "@/components/tournament/ScoreModal";
 
 export default function TournamentView() {

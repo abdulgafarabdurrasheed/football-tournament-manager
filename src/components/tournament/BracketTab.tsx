@@ -11,7 +11,7 @@ export function BracketTab({ tournamentId }: { tournamentId: string }) {
         <div className="overflow-x-auto">
             {rounds.map(round => (
                 <div key={round} className="mb-8">
-                    <h3 className="tet-lg font-bold text-white mb-2">Round {round}</h3>
+                    <h3 className="text-lg font-bold text-white mb-2">Round {round}</h3>
                     <div className="grid gap-4">
                         {knockoutMatches.filter(m => m.round === round).map(match => (
                             <div key={match.id} className="bg-slate-800 rounded-lg p-4 flex items-center justify-between">

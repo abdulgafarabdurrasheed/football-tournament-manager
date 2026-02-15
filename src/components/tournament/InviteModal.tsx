@@ -35,12 +35,12 @@ export function InviteModal({ tournamentId }: InviteModalProps) {
       const { error } = await supabase.from("tournament_invites").insert({
         tournament_id: tournamentId,
         email: email.trim().toLowerCase(),
-        type: "EMAIL",
+        invite_type: "EMAIL",
         status: "PENDING",
       });
       if (error) {
         if (error.code === "23505") {
-          toast.error("Invite link already dent to this user's email");
+          toast.error("Invite link already sent to this user's email");
         } else {
           throw error;
         }
