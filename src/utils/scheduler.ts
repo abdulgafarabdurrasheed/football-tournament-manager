@@ -130,8 +130,8 @@ export function generateKnockoutBracket(
     
     const match: MatchInsert = {
       tournament_id: tournamentId,
-      home_manager_id: home?.id !== 'BYE' ? home?.id : null,
-      away_manager_id: away?.id !== 'BYE' ? away?.id : null,
+      home_manager_id: home && home.id !== 'BYE' ? home.id : null,
+      away_manager_id: away && away.id !== 'BYE' ? away.id : null,
       match_type: 'KNOCKOUT',
       round: roundNumber,
       knockout_round: KNOCKOUT_ROUND_NAMES[bracketSize] || 'ROUND_OF_16',
@@ -214,17 +214,24 @@ function seedParticipants(
 }
 
 function generateSeedPositions(size: number): number[] {
-  if (size === 1) return [0]
-  if (size === 2) return [0, 1]
-  
-  const smaller = generateSeedPositions(size / 2)
-  const result: number[] = []
-  
-  for (const pos of smaller) {
-    result.push(pos * 2)
-    result.push(size - 1 - pos * 2)
+  // Generate standard bracket seed order (e.g. [1,8,4,5,2,7,3,6] for 8)
+  const seedOrder = generateSeedOrder(size)
+  // Invert: positions[seedIndex] = slotIndex
+  const positions: number[] = new Array(size)
+  for (let slot = 0; slot < size; slot++) {
+    positions[seedOrder[slot] - 1] = slot
   }
-  
+  return positions
+}
+
+function generateSeedOrder(n: number): number[] {
+  if (n === 1) return [1]
+  const smaller = generateSeedOrder(n / 2)
+  const result: number[] = []
+  for (const seed of smaller) {
+    result.push(seed)
+    result.push(n + 1 - seed)
+  }
   return result
 }
 

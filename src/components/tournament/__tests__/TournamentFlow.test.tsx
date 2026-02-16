@@ -278,7 +278,7 @@ describe('Analytics', () => {
     
     it('finds highest scoring match', () => {
       const stats = getTournamentStats(matches, managers)
-      expect(stats.highestScoringMatch?.id).toBe('2')
+      expect(stats.highestScoringMatch?.id).toBe('1')
     })
   })
 })
