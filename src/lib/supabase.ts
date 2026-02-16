@@ -134,3 +134,20 @@ export async function deleteGameplan(id: string) {
 
 	if (error) throw error;
 }
+
+export async function deleteAccount() {
+	const { data: { session } } = await supabase.auth.getSession()
+	if (!session) throw new Error('Not authenticated')
+
+	const response = await supabase.functions.invoke('delete-account', { 
+		headers: { 
+			Authorization: `Bearer ${session.access_token}`,
+		 },
+	 })
+
+	if (response.error) {
+		throw new Error(response.error.message || 'Failed to delete account')
+	}
+
+	await supabase.auth.signOut()
+}

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, devtools } from 'zustand/middleware'
-import { supabase, signInWithEmail, signUpWithEmail, signInWithGoogle, signOut as supabaseSignOut } from '@/lib/supabase'
+import { supabase, signInWithEmail, signUpWithEmail, signInWithGoogle, signOut as supabaseSignOut, deleteAccount } from '@/lib/supabase'
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
 import type { Tables } from '@/types/database.types'
 import { setSentryUser, captureError, addBreadcrumb } from '@/lib/sentry'
@@ -29,6 +29,7 @@ interface AuthState {
   fetchProfile: () => Promise<void>
   setError: (error: string | null) => void
   reset: () => void
+  deleteAccount: () => Promise<void>
 }
 
 const initialState = {
@@ -190,6 +191,25 @@ export const useAuthStore = create<AuthState>()(
 
         setError: (error) => set({ error }),
         reset: () => set({ ...initialState, isLoading: false }),
+        deleteAccount: async () => {
+          const user = get().user
+
+          if (!user) throw new Error('No user logged in')
+
+          try {
+            addBreadcrumb('User deleting account', 'auth', { userId: user.id })
+            set({ isLoading: true, error: null })
+
+            await deleteAccount()
+
+            setSentryUser(null)
+            set({ ...initialState, isLoading: false })
+          } catch (error) {
+            captureError(error as Error, { context: 'auth.deleteAccount' })
+            set({ error: (error as Error).message, isLoading: false })
+            throw error
+          }
+        },
       }),
       {
         name: 'auth-storage',

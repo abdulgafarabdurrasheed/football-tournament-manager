@@ -77,7 +77,7 @@ export function DeleteAccountModal({
               <h2 className="text-xl font-bold text-red-500">Delete Account</h2>
             </div>
 
-            <div className="space-y-3 mb-">
+            <div className="space-y-3 mb-6">
               <p className="text-slate-300 text-sm">
                 This action is{" "}
                 <span className="text-red-400 font-bold">

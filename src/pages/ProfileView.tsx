@@ -1,50 +1,67 @@
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { motion } from 'framer-motion'
-import { 
-  User, Mail, Camera, Save, Loader2, 
-  Trophy, Calendar, Target, AlertCircle,
-  CheckCircle2, ArrowLeft
-} from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { z } from 'zod'
-import { useUser, useAuthStore } from '@/stores/authStores'
-import { supabase } from '@/lib/supabase'
-import { Button } from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
-import Card from '@/components/ui/Card'
-import { AnimatedPage } from '@/components/ui/AnimatedPage'
-import { staggerContainerVariants, staggerItemVariants } from '@/lib/animations'
-
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import {
+  User,
+  Mail,
+  Camera,
+  Save,
+  Loader2,
+  Trophy,
+  Calendar,
+  Target,
+  AlertCircle,
+  CheckCircle2,
+  ArrowLeft,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { z } from "zod";
+import { useUser, useAuthStore } from "@/stores/authStores";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Card from "@/components/ui/Card";
+import { AnimatedPage } from "@/components/ui/AnimatedPage";
+import {
+  staggerContainerVariants,
+  staggerItemVariants,
+} from "@/lib/animations";
+import { useNavigate } from "react-router-dom";
+import { DeleteAccountModal } from "@/components/auth/DeleteAccountModal";
 
 const profileSchema = z.object({
-  displayName: z.string()
-    .min(2, 'Display name must be at least 2 characters')
-    .max(30, 'Display name must be under 30 characters')
+  displayName: z
+    .string()
+    .min(2, "Display name must be at least 2 characters")
+    .max(30, "Display name must be under 30 characters")
     .optional()
-    .or(z.literal('')),
-  avatarUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
-})
+    .or(z.literal("")),
+  avatarUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+});
 
-type ProfileFormData = z.infer<typeof profileSchema>
-
+type ProfileFormData = z.infer<typeof profileSchema>;
 
 interface UserStats {
-  tournamentsCreated: number
-  tournamentsJoined: number
-  matchesPlayed: number
-  winRate: number
-  memberSince: string
+  tournamentsCreated: number;
+  tournamentsJoined: number;
+  matchesPlayed: number;
+  winRate: number;
+  memberSince: string;
 }
 
 export default function ProfileView() {
-  const user = useUser()
-  const { fetchProfile, profile } = useAuthStore()
-  const [stats, setStats] = useState<UserStats | null>(null)
-  const [statsLoading, setStatsLoading] = useState(true)
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [avatarUploading, setAvatarUploading] = useState(false)
+  const user = useUser();
+  const { fetchProfile, profile } = useAuthStore();
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const navigate = useNavigate();
+  const { deleteAccount } = useAuthStore();
 
   const {
     register,
@@ -55,32 +72,31 @@ export default function ProfileView() {
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      displayName: user?.displayName || '',
-      avatarUrl: user?.avatarUrl || '',
+      displayName: user?.displayName || "",
+      avatarUrl: user?.avatarUrl || "",
     },
-  })
+  });
 
-  const currentAvatarUrl = watch('avatarUrl')
+  const currentAvatarUrl = watch("avatarUrl");
 
- 
   useEffect(() => {
     async function fetchStats() {
-      if (!user) return
-      
-      try {
+      if (!user) return;
 
+      try {
         const { count: tournamentCount } = await supabase
-          .from('tournaments')
-          .select('*', { count: 'exact', head: true })
-          .eq('creator_id', user.id)
+          .from("tournaments")
+          .select("*", { count: "exact", head: true })
+          .eq("creator_id", user.id);
 
         const { count: matchCount } = await supabase
-          .from('matches')
-          .select('*', { count: 'exact', head: true })
-          .or(`home_manager_id.eq.${user.id},away_manager_id.eq.${user.id}`)
+          .from("matches")
+          .select("*", { count: "exact", head: true })
+          .or(`home_manager_id.eq.${user.id},away_manager_id.eq.${user.id}`);
 
-        const memberSince = new Date(profile?.created_at || Date.now())
-          .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        const memberSince = new Date(
+          profile?.created_at || Date.now(),
+        ).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
         setStats({
           tournamentsCreated: tournamentCount || 0,
@@ -88,80 +104,85 @@ export default function ProfileView() {
           matchesPlayed: matchCount || 0,
           winRate: 0,
           memberSince,
-        })
+        });
       } catch (error) {
-        console.error('Failed to fetch stats:', error)
+        console.error("Failed to fetch stats:", error);
       } finally {
-        setStatsLoading(false)
+        setStatsLoading(false);
       }
     }
 
-    fetchStats()
-  }, [user])
+    fetchStats();
+  }, [user]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file || !user) return
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file')
-      return
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      alert('Image must be under 2MB')
-      return
+      alert("Image must be under 2MB");
+      return;
     }
 
-    setAvatarUploading(true)
+    setAvatarUploading(true);
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`
-      const filePath = `avatars/${fileName}`
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true })
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
 
-      if (uploadError) throw uploadError
+      if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath)
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
-      setValue('avatarUrl', publicUrl, { shouldDirty: true })
+      setValue("avatarUrl", publicUrl, { shouldDirty: true });
     } catch (error) {
-      console.error('Upload failed:', error)
-      alert('Failed to upload avatar')
+      console.error("Upload failed:", error);
+      alert("Failed to upload avatar");
     } finally {
-      setAvatarUploading(false)
+      setAvatarUploading(false);
     }
-  }
+  };
 
   const onSubmit = async (data: ProfileFormData) => {
-    if (!user) return
+    if (!user) return;
 
-    setSaveStatus('saving')
+    setSaveStatus("saving");
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({
           display_name: data.displayName || null,
           avatar_url: data.avatarUrl || null,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id)
+        .eq("id", user.id);
 
-      if (error) throw error
+      if (error) throw error;
 
-      await fetchProfile()
-      setSaveStatus('saved')
-      
-      setTimeout(() => setSaveStatus('idle'), 3000)
+      await fetchProfile();
+      setSaveStatus("saved");
+
+      setTimeout(() => setSaveStatus("idle"), 3000);
     } catch (error) {
-      console.error('Failed to update profile:', error)
-      setSaveStatus('error')
+      console.error("Failed to update profile:", error);
+      setSaveStatus("error");
     }
-  }
+  };
+
+  const handleDeleteAccount = async () => {
+    await deleteAccount();
+    navigate("/");
+  };
 
   if (!user) {
     return (
@@ -170,13 +191,13 @@ export default function ProfileView() {
           <p className="text-slate-400">Please sign in to view your profile.</p>
         </div>
       </AnimatedPage>
-    )
+    );
   }
 
   return (
     <AnimatedPage className="max-w-4xl mx-auto px-4 py-8">
-      <Link 
-        to="/dashboard" 
+      <Link
+        to="/dashboard"
         className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -193,9 +214,9 @@ export default function ProfileView() {
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full bg-slate-800 overflow-hidden">
                     {currentAvatarUrl ? (
-                      <img 
-                        src={currentAvatarUrl} 
-                        alt="Avatar" 
+                      <img
+                        src={currentAvatarUrl}
+                        alt="Avatar"
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -220,7 +241,9 @@ export default function ProfileView() {
                   </label>
                 </div>
                 <div>
-                  <p className="text-white font-medium">{user.displayName || 'No display name'}</p>
+                  <p className="text-white font-medium">
+                    {user.displayName || "No display name"}
+                  </p>
                   <p className="text-slate-400 text-sm">{user.email}</p>
                 </div>
               </div>
@@ -232,13 +255,15 @@ export default function ProfileView() {
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
-                    {...register('displayName')}
+                    {...register("displayName")}
                     placeholder="Enter display name"
-                    className={`pl-10 ${errors.displayName ? 'border-red-500' : ''}`}
+                    className={`pl-10 ${errors.displayName ? "border-red-500" : ""}`}
                   />
                 </div>
                 {errors.displayName && (
-                  <p className="text-red-400 text-sm">{errors.displayName.message}</p>
+                  <p className="text-red-400 text-sm">
+                    {errors.displayName.message}
+                  </p>
                 )}
               </div>
 
@@ -254,7 +279,9 @@ export default function ProfileView() {
                     className="pl-10 bg-slate-800/50 text-slate-400 cursor-not-allowed"
                   />
                 </div>
-                <p className="text-slate-500 text-xs">Email cannot be changed</p>
+                <p className="text-slate-500 text-xs">
+                  Email cannot be changed
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -262,21 +289,23 @@ export default function ProfileView() {
                   Avatar URL (optional)
                 </label>
                 <Input
-                  {...register('avatarUrl')}
+                  {...register("avatarUrl")}
                   placeholder="https://example.com/avatar.jpg"
-                  className={errors.avatarUrl ? 'border-red-500' : ''}
+                  className={errors.avatarUrl ? "border-red-500" : ""}
                 />
                 {errors.avatarUrl && (
-                  <p className="text-red-400 text-sm">{errors.avatarUrl.message}</p>
+                  <p className="text-red-400 text-sm">
+                    {errors.avatarUrl.message}
+                  </p>
                 )}
               </div>
 
               <div className="flex items-center gap-4">
                 <Button
                   type="submit"
-                  disabled={!isDirty || saveStatus === 'saving'}
+                  disabled={!isDirty || saveStatus === "saving"}
                 >
-                  {saveStatus === 'saving' ? (
+                  {saveStatus === "saving" ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Saving...
@@ -288,9 +317,9 @@ export default function ProfileView() {
                     </>
                   )}
                 </Button>
-                
-                {saveStatus === 'saved' && (
-                  <motion.span 
+
+                {saveStatus === "saved" && (
+                  <motion.span
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="flex items-center gap-1 text-green-500 text-sm"
@@ -299,9 +328,9 @@ export default function ProfileView() {
                     Saved!
                   </motion.span>
                 )}
-                
-                {saveStatus === 'error' && (
-                  <motion.span 
+
+                {saveStatus === "error" && (
+                  <motion.span
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="flex items-center gap-1 text-red-500 text-sm"
@@ -319,7 +348,7 @@ export default function ProfileView() {
           <Card>
             <div className="p-6">
               <h3 className="text-lg font-bold text-white mb-4">Your Stats</h3>
-              
+
               {statsLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3, 4].map((i) => (
@@ -330,39 +359,56 @@ export default function ProfileView() {
                   ))}
                 </div>
               ) : stats ? (
-                <motion.div 
+                <motion.div
                   variants={staggerContainerVariants}
                   initial="initial"
                   animate="animate"
                   className="space-y-4"
                 >
-                  <motion.div variants={staggerItemVariants} className="flex items-center gap-3">
+                  <motion.div
+                    variants={staggerItemVariants}
+                    className="flex items-center gap-3"
+                  >
                     <div className="p-2 bg-yellow-500/10 rounded-lg">
                       <Trophy className="h-5 w-5 text-yellow-500" />
                     </div>
                     <div>
-                      <p className="text-slate-400 text-sm">Tournaments Created</p>
-                      <p className="text-white font-bold">{stats.tournamentsCreated}</p>
+                      <p className="text-slate-400 text-sm">
+                        Tournaments Created
+                      </p>
+                      <p className="text-white font-bold">
+                        {stats.tournamentsCreated}
+                      </p>
                     </div>
                   </motion.div>
 
-                  <motion.div variants={staggerItemVariants} className="flex items-center gap-3">
+                  <motion.div
+                    variants={staggerItemVariants}
+                    className="flex items-center gap-3"
+                  >
                     <div className="p-2 bg-blue-500/10 rounded-lg">
                       <Target className="h-5 w-5 text-blue-500" />
                     </div>
                     <div>
                       <p className="text-slate-400 text-sm">Matches Played</p>
-                      <p className="text-white font-bold">{stats.matchesPlayed}</p>
+                      <p className="text-white font-bold">
+                        {stats.matchesPlayed}
+                      </p>
                     </div>
                   </motion.div>
 
-                  <motion.div variants={staggerItemVariants} className="flex items-center gap-3">
+                  <motion.div
+                    variants={staggerItemVariants}
+                    className="flex items-center gap-3"
+                  >
                     <div className="p-2 bg-green-500/10 rounded-lg">
                       <Calendar className="h-5 w-5 text-green-500" />
                     </div>
                     <div>
                       <p className="text-slate-400 text-sm">Member Since</p>
-                      <p className="text-white font-bold">{stats.memberSince}</p>
+                      <p className="text-white font-bold">
+                        {stats.memberSince}
+                      </p>
                     </div>
                   </motion.div>
                 </motion.div>
@@ -374,17 +420,29 @@ export default function ProfileView() {
 
           <Card className="border-red-900/50">
             <div className="p-6">
-              <h3 className="text-lg font-bold text-red-500 mb-2">Danger Zone</h3>
+              <h3 className="text-lg font-bold text-red-500 mb-2">
+                Danger Zone
+              </h3>
               <p className="text-slate-400 text-sm mb-4">
                 Permanently delete your account and all associated data.
               </p>
-              <Button variant="secondary" className="text-red-400 border-red-500/50 hover:bg-red-500/10">
+              <Button
+                variant="secondary"
+                className="text-red-400 border-red-500/50 hover:bg-red-500/10"
+                onClick={() => setShowDeleteModal(true)}
+              >
                 Delete Account
               </Button>
             </div>
           </Card>
         </div>
       </div>
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteAccount}
+        userEmail={user.email}
+      />
     </AnimatedPage>
-  )
+  );
 }
