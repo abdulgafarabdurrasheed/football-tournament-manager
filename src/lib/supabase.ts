@@ -10,7 +10,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const mmit -m @supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 	auth: {
 		autoRefreshToken: true,
 		persistSession: true,
